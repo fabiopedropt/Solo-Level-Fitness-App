@@ -1,109 +1,170 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useFonts, OpenSans_400Regular, OpenSans_700Bold } from '@expo-google-fonts/open-sans';
-import { Text, View, ActivityIndicator } from 'react-native';
-import HomeScreen from './screens/HomeScreen';
-import WorkoutScreen from './screens/WorkoutScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import StatsScreen from './screens/StatsScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import { SubscriptionProvider } from './utils/SubscriptionContext';
 
-export type RootStackParamList = {
-  Main: undefined;
-  Workout: undefined;
-  Profile: undefined;
-};
-
-export type TabParamList = {
-  Home: undefined;
-  Stats: undefined;
-  Profile: undefined;
-  Settings: undefined;
-};
-
-const Tab = createBottomTabNavigator<TabParamList>();
-const Stack = createNativeStackNavigator<RootStackParamList>();
-
-function TabNavigator() {
+// Simple screen components
+function HomeScreen() {
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Stats') {
-            iconName = focused ? 'stats-chart' : 'stats-chart-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          } else if (route.name === 'Settings') {
-            iconName = focused ? 'settings' : 'settings-outline';
-          }
-
-          // Return the icon component with the correct name
-          return <Ionicons name={iconName as any} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#4a4ae0',
-        tabBarInactiveTintColor: '#666666',
-        tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopColor: '#e0e0e0',
-        },
-        tabBarLabelStyle: {
-          fontFamily: 'OpenSans_400Regular',
-          fontSize: 12,
-        },
-      })}
-    >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Stats" component={StatsScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
-    </Tab.Navigator>
+    <SafeAreaView style={styles.screen}>
+      <Text style={styles.title}>Solo Leveling Training</Text>
+      <Text style={styles.text}>Welcome to your daily training!</Text>
+      
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Today's Workout</Text>
+        <View style={styles.exerciseRow}>
+          <Ionicons name="fitness-outline" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.exerciseText}>100 Push-ups</Text>
+        </View>
+        <View style={styles.exerciseRow}>
+          <Ionicons name="body-outline" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.exerciseText}>100 Squats</Text>
+        </View>
+        <View style={styles.exerciseRow}>
+          <Ionicons name="walk-outline" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.exerciseText}>10km Running</Text>
+        </View>
+        <View style={styles.exerciseRow}>
+          <Ionicons name="bicycle-outline" size={20} color="#333" style={styles.icon} />
+          <Text style={styles.exerciseText}>100 Sit-ups</Text>
+        </View>
+        
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Start Training</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
+function StatsScreen() {
+  return (
+    <SafeAreaView style={styles.screen}>
+      <Text style={styles.title}>Statistics</Text>
+      <Text style={styles.text}>Your training statistics will appear here.</Text>
+    </SafeAreaView>
+  );
+}
+
+function ProfileScreen() {
+  return (
+    <SafeAreaView style={styles.screen}>
+      <Text style={styles.title}>Profile</Text>
+      <Text style={styles.text}>Your profile information will appear here.</Text>
+    </SafeAreaView>
+  );
+}
+
+function SettingsScreen() {
+  return (
+    <SafeAreaView style={styles.screen}>
+      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.text}>App settings will appear here.</Text>
+    </SafeAreaView>
+  );
+}
+
+const Tab = createBottomTabNavigator();
+
 export default function App() {
-  // Load the Open Sans fonts
-  const [fontsLoaded] = useFonts({
-    OpenSans_400Regular,
-    OpenSans_700Bold,
-  });
-
-  // Show a loading screen while fonts are loading
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
-        <ActivityIndicator size="large" color="#4a4ae0" />
-        <Text style={{ marginTop: 16, color: '#333333' }}>Loading fonts...</Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaProvider>
-      <SubscriptionProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="Main"
-            screenOptions={{
-              headerShown: false,
-              animation: 'slide_from_right',
-            }}
-          >
-            <Stack.Screen name="Main" component={TabNavigator} />
-            <Stack.Screen name="Workout" component={WorkoutScreen} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SubscriptionProvider>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName;
+              
+              switch (route.name) {
+                case 'Home':
+                  iconName = focused ? 'home' : 'home-outline';
+                  break;
+                case 'Stats':
+                  iconName = focused ? 'stats-chart' : 'stats-chart-outline';
+                  break;
+                case 'Profile':
+                  iconName = focused ? 'person' : 'person-outline';
+                  break;
+                case 'Settings':
+                  iconName = focused ? 'settings' : 'settings-outline';
+                  break;
+                default:
+                  iconName = 'help-outline';
+              }
+              
+              return <Ionicons name={iconName} size={size} color={color} />;
+            },
+            tabBarActiveTintColor: '#4a4ae0',
+            tabBarInactiveTintColor: 'gray',
+          })}
+        >
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Stats" component={StatsScreen} />
+          <Tab.Screen name="Profile" component={ProfileScreen} />
+          <Tab.Screen name="Settings" component={SettingsScreen} />
+        </Tab.Navigator>
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#333',
+  },
+  text: {
+    fontSize: 16,
+    marginBottom: 24,
+    color: '#666',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#333',
+  },
+  exerciseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  icon: {
+    marginRight: 8,
+  },
+  exerciseText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  button: {
+    backgroundColor: '#4a4ae0',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
