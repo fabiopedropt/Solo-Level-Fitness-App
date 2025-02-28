@@ -9,11 +9,20 @@ interface AttributeStatsProps {
 
 export default function AttributeStats({ attributes }: AttributeStatsProps) {
   const { theme } = useTheme();
+  
+  // Ensure attributes exist and have valid values
+  const safeAttributes = {
+    strength: attributes?.strength || 1,
+    endurance: attributes?.endurance || 1,
+    agility: attributes?.agility || 1,
+    willpower: attributes?.willpower || 1
+  };
+  
   const maxAttribute = Math.max(
-    attributes.strength,
-    attributes.endurance,
-    attributes.agility,
-    attributes.willpower
+    safeAttributes.strength,
+    safeAttributes.endurance,
+    safeAttributes.agility,
+    safeAttributes.willpower
   );
   
   const getAttributeBarWidth = (value: number): string => {
@@ -31,12 +40,12 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
             style={[
               styles.attributeBar, 
               styles.strengthBar,
-              { width: getAttributeBarWidth(attributes.strength) }
+              { width: getAttributeBarWidth(safeAttributes.strength) }
             ]} 
           />
         </View>
         <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
-          {attributes.strength.toFixed(1)}
+          {safeAttributes.strength.toFixed(1)}
         </Text>
       </View>
       
@@ -47,12 +56,12 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
             style={[
               styles.attributeBar, 
               styles.enduranceBar,
-              { width: getAttributeBarWidth(attributes.endurance) }
+              { width: getAttributeBarWidth(safeAttributes.endurance) }
             ]} 
           />
         </View>
         <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
-          {attributes.endurance.toFixed(1)}
+          {safeAttributes.endurance.toFixed(1)}
         </Text>
       </View>
       
@@ -63,12 +72,12 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
             style={[
               styles.attributeBar, 
               styles.agilityBar,
-              { width: getAttributeBarWidth(attributes.agility) }
+              { width: getAttributeBarWidth(safeAttributes.agility) }
             ]} 
           />
         </View>
         <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
-          {attributes.agility.toFixed(1)}
+          {safeAttributes.agility.toFixed(1)}
         </Text>
       </View>
       
@@ -79,12 +88,12 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
             style={[
               styles.attributeBar, 
               styles.willpowerBar,
-              { width: getAttributeBarWidth(attributes.willpower) }
+              { width: getAttributeBarWidth(safeAttributes.willpower) }
             ]} 
           />
         </View>
         <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
-          {attributes.willpower.toFixed(1)}
+          {safeAttributes.willpower.toFixed(1)}
         </Text>
       </View>
     </View>

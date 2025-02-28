@@ -9,7 +9,7 @@ import WorkoutScreen from './screens/WorkoutScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import StatsScreen from './screens/StatsScreen';
 import SettingsScreen from './screens/SettingsScreen';
-import { ThemeProvider, useTheme } from './utils/ThemeContext';
+import { ThemeProvider, useTheme, darkTheme, lightTheme } from './utils/ThemeContext';
 import { SubscriptionProvider } from './utils/SubscriptionContext';
 
 export type RootStackParamList = {
@@ -29,7 +29,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 function TabNavigator() {
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
   
   return (
     <Tab.Navigator
@@ -67,12 +67,12 @@ function TabNavigator() {
 }
 
 function AppContent() {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   
   return (
     <NavigationContainer
       theme={{
-        dark: theme === darkTheme,
+        dark: isDark,
         colors: {
           primary: theme.primary,
           background: theme.background,

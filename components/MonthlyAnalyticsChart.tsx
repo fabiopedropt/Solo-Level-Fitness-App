@@ -10,16 +10,21 @@ interface MonthlyAnalyticsChartProps {
 export default function MonthlyAnalyticsChart({ monthlyWorkouts }: MonthlyAnalyticsChartProps) {
   const { theme } = useTheme();
   const months = getAnalyticsMonths();
-  const maxWorkouts = Math.max(
-    ...months.map(month => monthlyWorkouts[month] || 0),
-    1 // Ensure we don't divide by zero
-  );
+  
+  // Ensure we have a valid maxWorkouts value
+  const workoutValues = months.map(month => monthlyWorkouts?.[month] || 0);
+  const maxWorkouts = Math.max(...workoutValues, 1); // Ensure we don't divide by zero
   
   // Format month for display (e.g., "2023-01" -> "Jan")
   const formatMonth = (monthStr: string): string => {
-    const [year, month] = monthStr.split('-');
-    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-    return date.toLocaleString('default', { month: 'short' });
+    try {
+      const [year, month] = monthStr.split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+      return date.toLocaleString('default', { month: 'short' });
+    } catch (error) {
+      console.error('Error formatting month:', error);
+      return monthStr;
+    }
   };
 
   return (
@@ -28,7 +33,7 @@ export default function MonthlyAnalyticsChart({ monthlyWorkouts }: MonthlyAnalyt
       
       <View style={styles.chartContainer}>
         {months.map((month) => {
-          const workoutCount = monthlyWorkouts[month] || 0;
+          const workoutCount = monthlyWorkouts?.[month] || 0;
           const barHeight = (workoutCount / maxWorkouts) * 150; // Max height of 150
           
           return (
