@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { UserAttributes } from '../utils/mockData';
+import { Ionicons } from '@expo/vector-icons';
 
 interface AttributeStatsProps {
   attributes: UserAttributes;
@@ -23,7 +24,10 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
       <Text style={styles.title}>Hunter Attributes</Text>
       
       <View style={styles.attributeRow}>
-        <Text style={styles.attributeLabel}>Strength</Text>
+        <View style={styles.attributeLabelContainer}>
+          <Ionicons name="barbell-outline" size={18} color="#e53935" style={styles.attributeIcon} />
+          <Text style={styles.attributeLabel}>Strength</Text>
+        </View>
         <View style={styles.attributeBarContainer}>
           <View 
             style={[
@@ -37,7 +41,10 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={styles.attributeLabel}>Endurance</Text>
+        <View style={styles.attributeLabelContainer}>
+          <Ionicons name="heart-outline" size={18} color="#43a047" style={styles.attributeIcon} />
+          <Text style={styles.attributeLabel}>Endurance</Text>
+        </View>
         <View style={styles.attributeBarContainer}>
           <View 
             style={[
@@ -51,7 +58,10 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={styles.attributeLabel}>Agility</Text>
+        <View style={styles.attributeLabelContainer}>
+          <Ionicons name="flash-outline" size={18} color="#1e88e5" style={styles.attributeIcon} />
+          <Text style={styles.attributeLabel}>Agility</Text>
+        </View>
         <View style={styles.attributeBarContainer}>
           <View 
             style={[
@@ -65,7 +75,10 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={styles.attributeLabel}>Willpower</Text>
+        <View style={styles.attributeLabelContainer}>
+          <Ionicons name="flame-outline" size={18} color="#8e24aa" style={styles.attributeIcon} />
+          <Text style={styles.attributeLabel}>Willpower</Text>
+        </View>
         <View style={styles.attributeBarContainer}>
           <View 
             style={[
@@ -104,8 +117,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  attributeLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 100,
+  },
+  attributeIcon: {
+    marginRight: 4,
+  },
   attributeLabel: {
-    width: 80,
     fontSize: 14,
     color: '#555555',
   },

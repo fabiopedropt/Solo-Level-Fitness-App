@@ -142,11 +142,6 @@ const styles = StyleSheet.create({
   incrementButton: {
     backgroundColor: '#4CAF50',
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
   instructionsButton: {
     flexDirection: 'row',
     paddingVertical: 8,

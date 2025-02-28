@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getUserProgress } from '../utils/storage';
-import { UserProgress, getAnalyticsMonths } from '../utils/mockData';
-import MonthlyAnalyticsChart from '../components/MonthlyAnalyticsChart';
-import AttributeStats from '../components/AttributeStats';
+import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
+import AttributeStats from '../components/AttributeStats';
+import MonthlyAnalyticsChart from '../components/MonthlyAnalyticsChart';
+import { UserProgress, getAnalyticsMonths } from '../utils/mockData';
+import { getUserProgress } from '../utils/storage';
 
 export default function StatsScreen() {
   const { isPremium } = useSubscription();
@@ -58,28 +59,26 @@ export default function StatsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading stats...</Text>
-        </View>
+      <SafeAreaView style={styles.screen}>
+        <Text style={styles.text}>Loading stats...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Statistics</Text>
-      </View>
-
-      <ScrollView style={styles.content}>
+    <SafeAreaView style={styles.screen}>
+      <ScrollView style={styles.scrollContent}>
         {!isPremium && <AdBanner />}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Monthly Overview</Text>
+        <View style={styles.card}>
+          <View style={styles.cardTitleContainer}>
+            <Ionicons name="stats-chart-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+            <Text style={styles.cardTitle}>Monthly Overview</Text>
+          </View>
           
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
+              <Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>
                 {progress?.totalWorkoutsCompleted || 0}
               </Text>
@@ -89,6 +88,7 @@ export default function StatsScreen() {
             </View>
             
             <View style={styles.statCard}>
+              <Ionicons name="flame-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>
                 {progress?.streakDays || 0}
               </Text>
@@ -98,6 +98,7 @@ export default function StatsScreen() {
             </View>
             
             <View style={styles.statCard}>
+              <Ionicons name="pie-chart-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>
                 {calculateMonthlyCompletionRate()}
               </Text>
@@ -107,6 +108,7 @@ export default function StatsScreen() {
             </View>
             
             <View style={styles.statCard}>
+              <Ionicons name="trending-up-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>
                 {calculateStreakPercentage()}
               </Text>
@@ -123,8 +125,11 @@ export default function StatsScreen() {
             
             <AttributeStats attributes={progress.attributes} />
             
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Level Progress</Text>
+            <View style={styles.card}>
+              <View style={styles.cardTitleContainer}>
+                <Ionicons name="trophy-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+                <Text style={styles.cardTitle}>Level Progress</Text>
+              </View>
               
               <View style={styles.levelInfo}>
                 <View style={styles.levelHeader}>
@@ -149,8 +154,11 @@ export default function StatsScreen() {
               </View>
             </View>
             
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
+            <View style={styles.card}>
+              <View style={styles.cardTitleContainer}>
+                <Ionicons name="time-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+                <Text style={styles.cardTitle}>Recent Activity</Text>
+              </View>
               
               <View style={styles.activityItem}>
                 <View style={styles.activityDot} />
@@ -169,6 +177,7 @@ export default function StatsScreen() {
 
         {!isPremium && (
           <View style={styles.premiumPromo}>
+            <Ionicons name="star" size={24} color="#ffffff" style={styles.promoIcon} />
             <Text style={styles.promoTitle}>Upgrade to Premium</Text>
             <Text style={styles.promoText}>
               Get detailed analytics, export your data, and remove ads.
@@ -181,35 +190,20 @@ export default function StatsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  header: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#ffffff',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  content: {
-    flex: 1,
+  scrollContent: {
     padding: 16,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
+  text: {
     fontSize: 16,
-    color: '#333333',
+    color: '#666666',
+    textAlign: 'center',
+    marginTop: 20,
   },
-  section: {
+  card: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
@@ -220,11 +214,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  sectionTitle: {
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  cardTitleIcon: {
+    marginRight: 8,
+  },
+  cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 16,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -244,11 +245,13 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  statIcon: {
+    marginBottom: 8,
+  },
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#4a4ae0',
-    marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
@@ -320,6 +323,9 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 24,
     alignItems: 'center',
+  },
+  promoIcon: {
+    marginBottom: 8,
   },
   promoTitle: {
     fontSize: 18,

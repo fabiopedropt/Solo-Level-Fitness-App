@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Modal, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DailyWorkout, Exercise, UserProgress, getRandomQuote } from '../utils/mockData';
-import { getDailyWorkout, getUserProgress, saveDailyWorkout, updateWorkoutCompletion } from '../utils/storage';
-import ExerciseCard from '../components/ExerciseCard';
-import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
+import ExerciseCard from '../components/ExerciseCard';
+import { 
+  DailyWorkout, 
+  Exercise, 
+  UserProgress, 
+  getRandomQuote 
+} from '../utils/mockData';
+import { 
+  getDailyWorkout, 
+  getUserProgress, 
+  saveDailyWorkout, 
+  updateWorkoutCompletion 
+} from '../utils/storage';
 
-export default function WorkoutScreen() {
-  const navigation = useNavigation();
+export default function WorkoutScreen({ navigation }: any) {
   const { isPremium } = useSubscription();
   const [workout, setWorkout] = useState<DailyWorkout | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -109,27 +118,27 @@ export default function WorkoutScreen() {
     setShowAttributeGains(false);
     
     // Navigate back to home after showing gains
-    navigation.navigate('Home' as never);
+    navigation.navigate('Home');
   };
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.loadingText}>Loading...</Text>
+      <SafeAreaView style={styles.screen}>
+        <Text style={styles.text}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.screen}>
       <View style={styles.header}>
-        <Text style={styles.title}>Today's Training</Text>
+        <Text style={styles.headerTitle}>Today's Training</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.closeButton}>Close</Text>
+          <Ionicons name="close" size={24} color="#2196F3" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scrollContent}>
         {!isPremium && <AdBanner />}
         
         {workout && workout.exercises.map((exercise) => (
@@ -203,7 +212,7 @@ export default function WorkoutScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
@@ -216,21 +225,17 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
     backgroundColor: '#ffffff',
   },
-  title: {
+  headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333333',
   },
-  closeButton: {
-    fontSize: 16,
-    color: '#2196F3',
-  },
   scrollContent: {
     padding: 16,
   },
-  loadingText: {
+  text: {
     fontSize: 16,
-    color: '#333333',
+    color: '#666666',
     textAlign: 'center',
     marginTop: 20,
   },

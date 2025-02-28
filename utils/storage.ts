@@ -14,7 +14,6 @@ import {
 const DAILY_WORKOUT_KEY = 'solo_leveling_daily_workout';
 const USER_PROGRESS_KEY = 'solo_leveling_user_progress';
 const LEVEL_UP_NOTIFICATION_KEY = 'solo_leveling_level_up_notification';
-const SUBSCRIPTION_KEY = 'solo_leveling_subscription';
 
 // Save daily workout to AsyncStorage
 export const saveDailyWorkout = async (workout: DailyWorkout): Promise<void> => {
@@ -105,30 +104,6 @@ export const getLevelUpNotification = async (): Promise<{ shown: boolean, level:
   } catch (error) {
     console.error('Error getting level up notification:', error);
     return null;
-  }
-};
-
-// Save subscription status
-export const saveSubscription = async (isPremium: boolean): Promise<void> => {
-  try {
-    await AsyncStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify({ isPremium }));
-  } catch (error) {
-    console.error('Error saving subscription status:', error);
-  }
-};
-
-// Get subscription status
-export const getSubscription = async (): Promise<boolean> => {
-  try {
-    const subscriptionJson = await AsyncStorage.getItem(SUBSCRIPTION_KEY);
-    if (subscriptionJson) {
-      const { isPremium } = JSON.parse(subscriptionJson);
-      return isPremium;
-    }
-    return false;
-  } catch (error) {
-    console.error('Error getting subscription status:', error);
-    return false;
   }
 };
 

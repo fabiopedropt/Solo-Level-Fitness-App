@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { getAnalyticsMonths } from '../utils/mockData';
+import { Ionicons } from '@expo/vector-icons';
 
 interface MonthlyAnalyticsChartProps {
   monthlyWorkouts: Record<string, number>;
@@ -22,7 +23,10 @@ export default function MonthlyAnalyticsChart({ monthlyWorkouts }: MonthlyAnalyt
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Monthly Workouts</Text>
+      <View style={styles.titleContainer}>
+        <Ionicons name="calendar-outline" size={20} color="#333333" style={styles.titleIcon} />
+        <Text style={styles.title}>Monthly Workouts</Text>
+      </View>
       
       <View style={styles.chartContainer}>
         {months.map((month) => {
@@ -54,11 +58,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  titleIcon: {
+    marginRight: 8,
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 16,
   },
   chartContainer: {
     flexDirection: 'row',

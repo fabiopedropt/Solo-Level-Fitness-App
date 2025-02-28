@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { UserProgress, initialUserProgress } from '../utils/mockData';
-import { getUserProgress, saveUserProgress } from '../utils/storage';
-import { useNavigation } from '@react-navigation/native';
-import MonthlyAnalyticsChart from '../components/MonthlyAnalyticsChart';
-import AttributeStats from '../components/AttributeStats';
+import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
+import AttributeStats from '../components/AttributeStats';
+import MonthlyAnalyticsChart from '../components/MonthlyAnalyticsChart';
+import { UserProgress, initialUserProgress } from '../utils/mockData';
+import { getUserProgress, saveUserProgress } from '../utils/storage';
 
-export default function ProfileScreen() {
-  const navigation = useNavigation();
+export default function ProfileScreen({ navigation }: any) {
   const { isPremium } = useSubscription();
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,17 +90,15 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading profile data...</Text>
-        </View>
+      <SafeAreaView style={styles.screen}>
+        <Text style={styles.text}>Loading profile data...</Text>
       </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.screen}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadData}>
@@ -113,16 +110,16 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.screen}>
       <View style={styles.header}>
-        <Text style={styles.title}>Your Profile</Text>
+        <Text style={styles.headerTitle}>Your Profile</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.closeButton}>Close</Text>
+          <Ionicons name="close" size={24} color="#2196F3" />
         </TouchableOpacity>
       </View>
 
       {progress && (
-        <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <ScrollView style={styles.scrollContent}>
           {!isPremium && <AdBanner />}
           
           <View style={styles.levelCard}>
@@ -143,11 +140,13 @@ export default function ProfileScreen() {
           
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
+              <Ionicons name="flame-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>{progress.streakDays}</Text>
               <Text style={styles.statLabel}>Current Streak</Text>
             </View>
             
             <View style={styles.statCard}>
+              <Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>{progress.totalWorkoutsCompleted}</Text>
               <Text style={styles.statLabel}>Total Workouts</Text>
             </View>
@@ -157,25 +156,43 @@ export default function ProfileScreen() {
           
           <MonthlyAnalyticsChart monthlyWorkouts={progress.monthlyWorkouts} />
           
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Last Completed Workout</Text>
-            <Text style={styles.infoValue}>
+          <View style={styles.card}>
+            <View style={styles.cardTitleContainer}>
+              <Ionicons name="time-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+              <Text style={styles.cardTitle}>Last Completed Workout</Text>
+            </View>
+            <Text style={styles.cardText}>
               {progress.lastCompletedDate || 'No workouts completed yet'}
             </Text>
           </View>
           
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Solo Leveling Training</Text>
-            <Text style={styles.infoDescription}>
+          <View style={styles.card}>
+            <View style={styles.cardTitleContainer}>
+              <Ionicons name="information-circle-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+              <Text style={styles.cardTitle}>Solo Leveling Training</Text>
+            </View>
+            <Text style={styles.cardText}>
               This training regimen is inspired by the daily workout routine from Solo Leveling:
             </Text>
             <View style={styles.exerciseList}>
-              <Text style={styles.exerciseItem}>• 100 Push-ups</Text>
-              <Text style={styles.exerciseItem}>• 100 Squats</Text>
-              <Text style={styles.exerciseItem}>• 10km Running</Text>
-              <Text style={styles.exerciseItem}>• 100 Sit-ups</Text>
+              <View style={styles.exerciseItem}>
+                <Ionicons name="fitness-outline" size={16} color="#555555" style={styles.exerciseIcon} />
+                <Text style={styles.exerciseText}>100 Push-ups</Text>
+              </View>
+              <View style={styles.exerciseItem}>
+                <Ionicons name="body-outline" size={16} color="#555555" style={styles.exerciseIcon} />
+                <Text style={styles.exerciseText}>100 Squats</Text>
+              </View>
+              <View style={styles.exerciseItem}>
+                <Ionicons name="walk-outline" size={16} color="#555555" style={styles.exerciseIcon} />
+                <Text style={styles.exerciseText}>10km Running</Text>
+              </View>
+              <View style={styles.exerciseItem}>
+                <Ionicons name="bicycle-outline" size={16} color="#555555" style={styles.exerciseIcon} />
+                <Text style={styles.exerciseText}>100 Sit-ups</Text>
+              </View>
             </View>
-            <Text style={styles.infoDescription}>
+            <Text style={styles.cardText}>
               Complete this workout every day to build your strength and endurance!
             </Text>
           </View>
@@ -190,7 +207,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
@@ -203,30 +220,19 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
     backgroundColor: '#ffffff',
   },
-  title: {
+  headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333333',
   },
-  closeButton: {
-    fontSize: 16,
-    color: '#2196F3',
-  },
-  content: {
-    flex: 1,
-  },
-  contentContainer: {
+  scrollContent: {
     padding: 16,
-    paddingBottom: 32,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
+  text: {
     fontSize: 16,
-    color: '#333333',
+    color: '#666666',
+    textAlign: 'center',
+    marginTop: 20,
   },
   errorContainer: {
     flex: 1,
@@ -308,6 +314,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  statIcon: {
+    marginBottom: 8,
+  },
   statValue: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -316,9 +325,8 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: '#666666',
-    marginTop: 4,
   },
-  infoCard: {
+  card: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
@@ -329,17 +337,20 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  infoTitle: {
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  cardTitleIcon: {
+    marginRight: 8,
+  },
+  cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 8,
   },
-  infoValue: {
-    fontSize: 16,
-    color: '#555555',
-  },
-  infoDescription: {
+  cardText: {
     fontSize: 14,
     color: '#555555',
     lineHeight: 20,
@@ -347,12 +358,18 @@ const styles = StyleSheet.create({
   },
   exerciseList: {
     marginVertical: 12,
-    paddingLeft: 8,
   },
   exerciseItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  exerciseIcon: {
+    marginRight: 8,
+  },
+  exerciseText: {
     fontSize: 14,
     color: '#555555',
-    marginBottom: 4,
   },
   resetButton: {
     backgroundColor: '#f44336',

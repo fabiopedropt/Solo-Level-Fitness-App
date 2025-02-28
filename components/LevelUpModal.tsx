@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, Modal, TouchableOpacity } from 'react-native';
 import { getRandomQuote } from '../utils/mockData';
+import { Ionicons } from '@expo/vector-icons';
 
 interface LevelUpModalProps {
   visible: boolean;
@@ -19,6 +20,7 @@ export default function LevelUpModal({ visible, level, onClose }: LevelUpModalPr
       <View style={styles.container}>
         <View style={styles.content}>
           <View style={styles.header}>
+            <Ionicons name="trophy" size={48} color="#FFD700" style={styles.trophyIcon} />
             <Text style={styles.levelUpText}>LEVEL UP!</Text>
           </View>
           
@@ -59,6 +61,10 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 20,
+    alignItems: 'center',
+  },
+  trophyIcon: {
+    marginBottom: 10,
   },
   levelUpText: {
     fontSize: 32,

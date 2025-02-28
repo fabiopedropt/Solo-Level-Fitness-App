@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DailyWorkout, UserProgress, getTodayDateString, getRandomQuote } from '../utils/mockData';
-import { getDailyWorkout, getUserProgress, getLevelUpNotification, saveLevelUpNotification } from '../utils/storage';
-import { useNavigation } from '@react-navigation/native';
-import LevelUpModal from '../components/LevelUpModal';
+import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
+import LevelUpModal from '../components/LevelUpModal';
+import { 
+  DailyWorkout, 
+  UserProgress, 
+  getTodayDateString, 
+  getRandomQuote 
+} from '../utils/mockData';
+import { 
+  getDailyWorkout, 
+  getUserProgress, 
+  getLevelUpNotification, 
+  saveLevelUpNotification 
+} from '../utils/storage';
 
-export default function HomeScreen() {
-  const navigation = useNavigation();
+export default function HomeScreen({ navigation }: any) {
   const { isPremium } = useSubscription();
   const [workout, setWorkout] = useState<DailyWorkout | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -70,22 +79,22 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.loadingText}>Loading...</Text>
+      <SafeAreaView style={styles.screen}>
+        <Text style={styles.text}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={styles.screen}>
+      <ScrollView>
         <View style={styles.header}>
           <Text style={styles.title}>Solo Leveling Training</Text>
-          <Text style={styles.date}>{getTodayDateString()}</Text>
+          <Text style={styles.subtitle}>{getTodayDateString()}</Text>
         </View>
 
         {progress && (
-          <View style={styles.levelContainer}>
+          <View style={styles.levelCard}>
             <View style={styles.levelHeader}>
               <Text style={styles.levelLabel}>LEVEL</Text>
               <Text style={styles.levelValue}>{progress.level}</Text>
@@ -104,7 +113,8 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <View style={styles.quoteContainer}>
+        <View style={styles.quoteCard}>
+          <Ionicons name="chatbubble-outline" size={20} color="#ffffff" style={styles.quoteIcon} />
           <Text style={styles.quoteText}>"{quote}"</Text>
           <Text style={styles.quoteAuthor}>- Sung Jin-Woo</Text>
         </View>
@@ -114,26 +124,42 @@ export default function HomeScreen() {
         {progress && (
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
+              <Ionicons name="flame-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>{progress.streakDays}</Text>
               <Text style={styles.statLabel}>Day Streak</Text>
             </View>
             <View style={styles.statCard}>
+              <Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>{progress.totalWorkoutsCompleted}</Text>
               <Text style={styles.statLabel}>Workouts</Text>
             </View>
             <View style={styles.statCard}>
+              <Ionicons name="pie-chart-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>{calculateOverallProgress()}%</Text>
               <Text style={styles.statLabel}>Today</Text>
             </View>
           </View>
         )}
 
-        <View style={styles.workoutCard}>
-          <Text style={styles.workoutTitle}>Today's Training</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Today's Training</Text>
           
           {workout && workout.exercises.map((exercise) => (
             <View key={exercise.id} style={styles.exerciseRow}>
-              <Text style={styles.exerciseName}>{exercise.name}</Text>
+              <View style={styles.exerciseNameContainer}>
+                <Ionicons 
+                  name={
+                    exercise.name === 'Push-ups' ? 'fitness-outline' :
+                    exercise.name === 'Squats' ? 'body-outline' :
+                    exercise.name === 'Running' ? 'walk-outline' :
+                    exercise.name === 'Sit-ups' ? 'bicycle-outline' : 'barbell-outline'
+                  } 
+                  size={20} 
+                  color="#333333" 
+                  style={styles.exerciseIcon} 
+                />
+                <Text style={styles.exerciseName}>{exercise.name}</Text>
+              </View>
               <View style={styles.exerciseProgress}>
                 <View 
                   style={[
@@ -150,23 +176,23 @@ export default function HomeScreen() {
           
           <TouchableOpacity 
             style={[
-              styles.startButton,
+              styles.button,
               workout?.completed ? styles.completedButton : null
             ]}
-            onPress={() => navigation.navigate('Workout' as never)}
+            onPress={() => navigation.navigate('Workout')}
             disabled={workout?.completed}
           >
-            <Text style={styles.startButtonText}>
+            <Text style={styles.buttonText}>
               {workout?.completed ? 'Completed' : 'Start Training'}
             </Text>
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity 
-          style={styles.profileButton}
-          onPress={() => navigation.navigate('Profile' as never)}
+          style={[styles.button, { backgroundColor: '#2196F3', marginBottom: 20 }]}
+          onPress={() => navigation.navigate('Profile')}
         >
-          <Text style={styles.profileButtonText}>View Profile</Text>
+          <Text style={styles.buttonText}>View Profile</Text>
         </TouchableOpacity>
       </ScrollView>
       
@@ -180,12 +206,10 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  scrollContent: {
     padding: 16,
+    backgroundColor: '#f5f5f5',
   },
   header: {
     marginBottom: 16,
@@ -195,12 +219,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333333',
   },
-  date: {
+  subtitle: {
     fontSize: 16,
     color: '#666666',
-    marginTop: 4,
   },
-  levelContainer: {
+  levelCard: {
     backgroundColor: '#1a1a2e',
     borderRadius: 12,
     padding: 16,
@@ -243,7 +266,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textAlign: 'right',
   },
-  quoteContainer: {
+  quoteCard: {
     backgroundColor: '#1a1a2e',
     borderRadius: 12,
     padding: 16,
@@ -253,6 +276,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+  },
+  quoteIcon: {
+    marginBottom: 8,
   },
   quoteText: {
     fontSize: 16,
@@ -284,17 +310,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  statIcon: {
+    marginBottom: 8,
+  },
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333333',
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666666',
-    marginTop: 4,
   },
-  workoutCard: {
+  card: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
@@ -303,10 +331,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
   },
-  workoutTitle: {
-    fontSize: 20,
+  cardTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
     marginBottom: 16,
@@ -316,10 +344,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  exerciseNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '30%',
+  },
+  exerciseIcon: {
+    marginRight: 4,
+  },
   exerciseName: {
     fontSize: 16,
     color: '#333333',
-    width: '30%',
   },
   exerciseProgress: {
     flex: 1,
@@ -340,7 +375,7 @@ const styles = StyleSheet.create({
     width: '20%',
     textAlign: 'right',
   },
-  startButton: {
+  button: {
     backgroundColor: '#4CAF50',
     borderRadius: 8,
     paddingVertical: 12,
@@ -350,26 +385,14 @@ const styles = StyleSheet.create({
   completedButton: {
     backgroundColor: '#9E9E9E',
   },
-  startButtonText: {
+  buttonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  profileButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  profileButtonText: {
-    color: '#ffffff',
+  text: {
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#333333',
+    color: '#666666',
     textAlign: 'center',
-    marginTop: 20,
   },
 });

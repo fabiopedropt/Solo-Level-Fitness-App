@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSubscription } from '../utils/SubscriptionContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
 
 export default function SettingsScreen() {
@@ -24,18 +24,23 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Settings</Text>
-      </View>
-
-      <ScrollView style={styles.content}>
+    <SafeAreaView style={styles.screen}>
+      <ScrollView style={styles.scrollContent}>
         {!isPremium && <AdBanner size="large" />}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Subscription</Text>
+        <View style={styles.card}>
+          <View style={styles.cardTitleContainer}>
+            <Ionicons name="card-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+            <Text style={styles.cardTitle}>Subscription</Text>
+          </View>
           
           <View style={styles.subscriptionStatus}>
+            <Ionicons 
+              name={isPremium ? "checkmark-circle" : "close-circle-outline"} 
+              size={20} 
+              color={isPremium ? "#4CAF50" : "#666666"} 
+              style={styles.statusIcon} 
+            />
             <Text style={styles.statusLabel}>Status:</Text>
             <Text style={[
               styles.statusValue, 
@@ -53,7 +58,7 @@ export default function SettingsScreen() {
               </View>
               
               <TouchableOpacity 
-                style={styles.subscriptionButton}
+                style={styles.cancelButton}
                 onPress={cancelSubscription}
               >
                 <Text style={styles.buttonText}>Cancel Subscription</Text>
@@ -65,6 +70,7 @@ export default function SettingsScreen() {
             <>
               <View style={styles.planContainer}>
                 <View style={styles.planCard}>
+                  <Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.planIcon} />
                   <Text style={styles.planTitle}>Monthly</Text>
                   <Text style={styles.planPrice}>2€</Text>
                   <Text style={styles.planPeriod}>per month</Text>
@@ -80,6 +86,7 @@ export default function SettingsScreen() {
                   <View style={styles.bestValueTag}>
                     <Text style={styles.bestValueText}>SAVE 10%</Text>
                   </View>
+                  <Ionicons name="calendar" size={24} color="#4a4ae0" style={styles.planIcon} />
                   <Text style={styles.planTitle}>Yearly</Text>
                   <Text style={styles.planPrice}>21.6€</Text>
                   <Text style={styles.planPeriod}>per year</Text>
@@ -91,12 +98,19 @@ export default function SettingsScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+              
+              <TouchableOpacity style={styles.restoreButton}>
+                <Text style={styles.restoreText}>Restore Purchases</Text>
+              </TouchableOpacity>
             </>
           )}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Management</Text>
+        <View style={styles.card}>
+          <View style={styles.cardTitleContainer}>
+            <Ionicons name="settings-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+            <Text style={styles.cardTitle}>Data Management</Text>
+          </View>
           
           <TouchableOpacity 
             style={styles.settingRow}
@@ -107,8 +121,11 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+        <View style={styles.card}>
+          <View style={styles.cardTitleContainer}>
+            <Ionicons name="information-circle-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+            <Text style={styles.cardTitle}>About</Text>
+          </View>
           
           <View style={styles.settingRow}>
             <Text style={styles.settingLabel}>Version</Text>
@@ -131,26 +148,14 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  header: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#ffffff',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333333',
-  },
-  content: {
-    flex: 1,
+  scrollContent: {
     padding: 16,
   },
-  section: {
+  card: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
@@ -161,11 +166,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  sectionTitle: {
+  cardTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  cardTitleIcon: {
+    marginRight: 8,
+  },
+  cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
-    marginBottom: 16,
   },
   settingRow: {
     flexDirection: 'row',
@@ -181,7 +193,11 @@ const styles = StyleSheet.create({
   },
   subscriptionStatus: {
     flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
+  },
+  statusIcon: {
+    marginRight: 4,
   },
   statusLabel: {
     fontSize: 16,
@@ -239,6 +255,9 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
+  planIcon: {
+    marginBottom: 8,
+  },
   planTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -263,7 +282,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  subscriptionButton: {
+  cancelButton: {
     backgroundColor: '#f44336',
     paddingVertical: 12,
     borderRadius: 8,
@@ -273,6 +292,14 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold',
+  },
+  restoreButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  restoreText: {
+    fontSize: 14,
+    color: '#4a4ae0',
   },
   versionText: {
     fontSize: 14,
