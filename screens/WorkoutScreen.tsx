@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Modal, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import * as Icon from '@expo/vector-icons';
 import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
 import ExerciseCard from '../components/ExerciseCard';
@@ -48,14 +48,20 @@ export default function WorkoutScreen({ navigation }: any) {
     }
   };
 
-  const handleIncrement = async (exerciseId: string) => {
+  const handleIncrement = async (exerciseId: string, amount: number = 1) => {
     if (!workout) return;
+    
+    console.log(`Incrementing exercise ${exerciseId} by ${amount}`);
     
     const updatedExercises = workout.exercises.map(exercise => {
       if (exercise.id === exerciseId) {
+        // For running, we increment by 0.5 km per unit
+        const incrementAmount = exercise.name === 'Running' ? amount * 0.5 : amount;
+        console.log(`Actual increment amount: ${incrementAmount}`);
+        
         return {
           ...exercise,
-          completed: exercise.completed + (exercise.name === 'Running' ? 0.5 : 1)
+          completed: exercise.completed + incrementAmount
         };
       }
       return exercise;
@@ -86,15 +92,16 @@ export default function WorkoutScreen({ navigation }: any) {
     }
   };
 
-  const handleDecrement = async (exerciseId: string) => {
+  const handleDecrement = async (exerciseId: string, amount: number = 1) => {
     if (!workout) return;
     
     const updatedExercises = workout.exercises.map(exercise => {
       if (exercise.id === exerciseId) {
-        const decrementValue = exercise.name === 'Running' ? 0.5 : 1;
+        // For running, we decrement by 0.5 km per unit
+        const decrementAmount = exercise.name === 'Running' ? amount * 0.5 : amount;
         return {
           ...exercise,
-          completed: Math.max(0, exercise.completed - decrementValue)
+          completed: Math.max(0, exercise.completed - decrementAmount)
         };
       }
       return exercise;
@@ -118,7 +125,7 @@ export default function WorkoutScreen({ navigation }: any) {
     setShowAttributeGains(false);
     
     // Navigate back to home after showing gains
-    navigation.navigate('Home');
+    navigation.navigate('HomeMain');
   };
 
   if (loading) {
@@ -134,7 +141,7 @@ export default function WorkoutScreen({ navigation }: any) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Today's Training</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="close" size={24} color="#2196F3" />
+          <Icon.Ionicons name="close" size={24} color="#2196F3" />
         </TouchableOpacity>
       </View>
 
@@ -145,8 +152,8 @@ export default function WorkoutScreen({ navigation }: any) {
           <ExerciseCard
             key={exercise.id}
             exercise={exercise}
-            onIncrement={() => handleIncrement(exercise.id)}
-            onDecrement={() => handleDecrement(exercise.id)}
+            onIncrement={(amount) => handleIncrement(exercise.id, amount)}
+            onDecrement={(amount) => handleDecrement(exercise.id, amount)}
             onViewInstructions={() => showInstructions(exercise)}
           />
         ))}
@@ -211,6 +218,7 @@ export default function WorkoutScreen({ navigation }: any) {
   );
 }
 
+// Styles remain the same
 const styles = StyleSheet.create({
   screen: {
     flex: 1,

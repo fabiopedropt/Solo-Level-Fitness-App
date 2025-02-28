@@ -39,8 +39,6 @@ export default function ExerciseCard({
   const isRunning = exercise.name === 'Running';
   const increment5Label = isRunning ? '+2.5' : '+5';
   const increment10Label = isRunning ? '+5' : '+10';
-  const increment5Value = isRunning ? 5 : 5; // 5 half-kilometers = 2.5km
-  const increment10Value = isRunning ? 10 : 10; // 10 half-kilometers = 5km
   
   return (
     <View style={styles.card}>
@@ -88,14 +86,14 @@ export default function ExerciseCard({
         <View style={styles.quickIncrementContainer}>
           <TouchableOpacity 
             style={styles.quickIncrementButton}
-            onPress={() => onIncrement(increment5Value)}
+            onPress={() => onIncrement(isRunning ? 5 : 5)}
           >
             <Text style={styles.quickIncrementText}>{increment5Label}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.quickIncrementButton}
-            onPress={() => onIncrement(increment10Value)}
+            onPress={() => onIncrement(isRunning ? 10 : 10)}
           >
             <Text style={styles.quickIncrementText}>{increment10Label}</Text>
           </TouchableOpacity>
