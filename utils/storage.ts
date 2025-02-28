@@ -14,6 +14,7 @@ import {
 const DAILY_WORKOUT_KEY = 'solo_leveling_daily_workout';
 const USER_PROGRESS_KEY = 'solo_leveling_user_progress';
 const LEVEL_UP_NOTIFICATION_KEY = 'solo_leveling_level_up_notification';
+const SUBSCRIPTION_KEY = 'solo_leveling_subscription';
 
 // Save daily workout to AsyncStorage
 export const saveDailyWorkout = async (workout: DailyWorkout): Promise<void> => {
@@ -69,22 +70,8 @@ export const getUserProgress = async (): Promise<UserProgress> => {
   try {
     const progressJson = await AsyncStorage.getItem(USER_PROGRESS_KEY);
     if (progressJson) {
-      const parsedProgress = JSON.parse(progressJson);
-      
-      // Ensure the progress object has all required fields
-      const validatedProgress = {
-        ...initialUserProgress,
-        ...parsedProgress,
-        attributes: {
-          ...initialUserProgress.attributes,
-          ...(parsedProgress.attributes || {})
-        },
-        monthlyWorkouts: parsedProgress.monthlyWorkouts || {}
-      };
-      
-      return validatedProgress;
+      return JSON.parse(progressJson);
     }
-    
     // If no progress exists, use initial progress
     await saveUserProgress(initialUserProgress);
     return initialUserProgress;
@@ -121,17 +108,27 @@ export const getLevelUpNotification = async (): Promise<{ shown: boolean, level:
   }
 };
 
-// Clear all app data (for debugging)
-export const clearAllData = async (): Promise<void> => {
+// Save subscription status
+export const saveSubscription = async (isPremium: boolean): Promise<void> => {
   try {
-    await AsyncStorage.multiRemove([
-      DAILY_WORKOUT_KEY,
-      USER_PROGRESS_KEY,
-      LEVEL_UP_NOTIFICATION_KEY
-    ]);
-    console.log('All app data cleared');
+    await AsyncStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify({ isPremium }));
   } catch (error) {
-    console.error('Error clearing app data:', error);
+    console.error('Error saving subscription status:', error);
+  }
+};
+
+// Get subscription status
+export const getSubscription = async (): Promise<boolean> => {
+  try {
+    const subscriptionJson = await AsyncStorage.getItem(SUBSCRIPTION_KEY);
+    if (subscriptionJson) {
+      const { isPremium } = JSON.parse(subscriptionJson);
+      return isPremium;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error getting subscription status:', error);
+    return false;
   }
 };
 
@@ -164,11 +161,6 @@ export const updateWorkoutCompletion = async (
     progress.totalWorkoutsCompleted += 1;
     progress.lastCompletedDate = today;
     
-    // Ensure monthlyWorkouts exists
-    if (!progress.monthlyWorkouts) {
-      progress.monthlyWorkouts = {};
-    }
-    
     // Update monthly workouts
     if (!progress.monthlyWorkouts[currentMonth]) {
       progress.monthlyWorkouts[currentMonth] = 0;
@@ -187,11 +179,6 @@ export const updateWorkoutCompletion = async (
     
     // Calculate attribute gains
     attributeGains = calculateAttributeGains(workout);
-    
-    // Ensure attributes exists
-    if (!progress.attributes) {
-      progress.attributes = initialUserProgress.attributes;
-    }
     
     // Update attributes
     Object.keys(attributeGains).forEach(key => {

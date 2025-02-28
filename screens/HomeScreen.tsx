@@ -1,92 +1,375 @@
-import React from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import { useTheme } from '../utils/ThemeContext';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { DailyWorkout, UserProgress, getTodayDateString, getRandomQuote } from '../utils/mockData';
+import { getDailyWorkout, getUserProgress, getLevelUpNotification, saveLevelUpNotification } from '../utils/storage';
+import { useNavigation } from '@react-navigation/native';
+import LevelUpModal from '../components/LevelUpModal';
 import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
 
 export default function HomeScreen() {
-  const { theme } = useTheme();
+  const navigation = useNavigation();
   const { isPremium } = useSubscription();
-  
+  const [workout, setWorkout] = useState<DailyWorkout | null>(null);
+  const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [quote, setQuote] = useState<string>('');
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [levelUpLevel, setLevelUpLevel] = useState(1);
+
+  useEffect(() => {
+    loadData();
+    setQuote(getRandomQuote());
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [workoutData, progressData, levelUpNotification] = await Promise.all([
+        getDailyWorkout(),
+        getUserProgress(),
+        getLevelUpNotification(),
+      ]);
+      
+      setWorkout(workoutData);
+      setProgress(progressData);
+      
+      // Check for level up notification
+      if (levelUpNotification && !levelUpNotification.shown) {
+        setLevelUpLevel(levelUpNotification.level);
+        setShowLevelUp(true);
+        // Mark as shown
+        await saveLevelUpNotification({ ...levelUpNotification, shown: true });
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLevelUpClose = () => {
+    setShowLevelUp(false);
+  };
+
+  const calculateOverallProgress = (): number => {
+    if (!workout) return 0;
+    
+    const totalCompleted = workout.exercises.reduce(
+      (sum, exercise) => sum + (exercise.completed / exercise.target), 
+      0
+    );
+    
+    return Math.round((totalCompleted / workout.exercises.length) * 100);
+  };
+
+  const calculateExperiencePercentage = (): number => {
+    if (!progress) return 0;
+    return Math.round((progress.experience / progress.experienceToNextLevel) * 100);
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>Solo Leveling Training</Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Complete your daily training to level up!
-        </Text>
-        
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Today's Workout</Text>
-          <Text style={[styles.exercise, { color: theme.text }]}>• 100 Push-ups</Text>
-          <Text style={[styles.exercise, { color: theme.text }]}>• 100 Squats</Text>
-          <Text style={[styles.exercise, { color: theme.text }]}>• 10km Run</Text>
-          <Text style={[styles.exercise, { color: theme.text }]}>• 100 Sit-ups</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Solo Leveling Training</Text>
+          <Text style={styles.date}>{getTodayDateString()}</Text>
         </View>
-        
+
+        {progress && (
+          <View style={styles.levelContainer}>
+            <View style={styles.levelHeader}>
+              <Text style={styles.levelLabel}>LEVEL</Text>
+              <Text style={styles.levelValue}>{progress.level}</Text>
+            </View>
+            <View style={styles.expBarContainer}>
+              <View 
+                style={[
+                  styles.expBar, 
+                  { width: `${calculateExperiencePercentage()}%` }
+                ]} 
+              />
+            </View>
+            <Text style={styles.expText}>
+              {progress.experience} / {progress.experienceToNextLevel} XP
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.quoteContainer}>
+          <Text style={styles.quoteText}>"{quote}"</Text>
+          <Text style={styles.quoteAuthor}>- Sung Jin-Woo</Text>
+        </View>
+
         {!isPremium && <AdBanner />}
-        
-        <View style={[styles.quoteCard, { backgroundColor: theme.quoteBackground }]}>
-          <Text style={[styles.quote, { color: theme.quoteText }]}>
-            "I alone level up."
-          </Text>
-          <Text style={[styles.quoteAuthor, { color: theme.quoteAuthor }]}>
-            - Sung Jin-Woo
-          </Text>
+
+        {progress && (
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{progress.streakDays}</Text>
+              <Text style={styles.statLabel}>Day Streak</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{progress.totalWorkoutsCompleted}</Text>
+              <Text style={styles.statLabel}>Workouts</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{calculateOverallProgress()}%</Text>
+              <Text style={styles.statLabel}>Today</Text>
+            </View>
+          </View>
+        )}
+
+        <View style={styles.workoutCard}>
+          <Text style={styles.workoutTitle}>Today's Training</Text>
+          
+          {workout && workout.exercises.map((exercise) => (
+            <View key={exercise.id} style={styles.exerciseRow}>
+              <Text style={styles.exerciseName}>{exercise.name}</Text>
+              <View style={styles.exerciseProgress}>
+                <View 
+                  style={[
+                    styles.progressIndicator, 
+                    { width: `${Math.min((exercise.completed / exercise.target) * 100, 100)}%` }
+                  ]} 
+                />
+              </View>
+              <Text style={styles.exerciseCount}>
+                {exercise.completed}/{exercise.target}
+              </Text>
+            </View>
+          ))}
+          
+          <TouchableOpacity 
+            style={[
+              styles.startButton,
+              workout?.completed ? styles.completedButton : null
+            ]}
+            onPress={() => navigation.navigate('Workout' as never)}
+            disabled={workout?.completed}
+          >
+            <Text style={styles.startButtonText}>
+              {workout?.completed ? 'Completed' : 'Start Training'}
+            </Text>
+          </TouchableOpacity>
         </View>
+
+        <TouchableOpacity 
+          style={styles.profileButton}
+          onPress={() => navigation.navigate('Profile' as never)}
+        >
+          <Text style={styles.profileButtonText}>View Profile</Text>
+        </TouchableOpacity>
       </ScrollView>
-    </View>
+      
+      <LevelUpModal 
+        visible={showLevelUp} 
+        level={levelUpLevel} 
+        onClose={handleLevelUpClose} 
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  content: {
+  scrollContent: {
     padding: 16,
+  },
+  header: {
+    marginBottom: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#333333',
   },
-  subtitle: {
+  date: {
     fontSize: 16,
-    marginBottom: 24,
+    color: '#666666',
+    marginTop: 4,
   },
-  card: {
+  levelContainer: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 12,
     padding: 16,
-    borderRadius: 8,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  exercise: {
-    fontSize: 16,
+  levelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  quoteCard: {
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 16,
+  levelLabel: {
+    fontSize: 16,
+    color: '#ffffff',
+    marginRight: 8,
   },
-  quote: {
+  levelValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4a4ae0',
+  },
+  expBarContainer: {
+    height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 4,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  expBar: {
+    height: '100%',
+    backgroundColor: '#4a4ae0',
+    borderRadius: 4,
+  },
+  expText: {
+    fontSize: 12,
+    color: '#ffffff',
+    textAlign: 'right',
+  },
+  quoteContainer: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quoteText: {
     fontSize: 16,
     fontStyle: 'italic',
+    color: '#ffffff',
     marginBottom: 8,
     textAlign: 'center',
   },
   quoteAuthor: {
     fontSize: 14,
+    color: '#aaaaaa',
     textAlign: 'right',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  statCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    flex: 1,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333333',
+  },
+  statLabel: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 4,
+  },
+  workoutCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  workoutTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 16,
+  },
+  exerciseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  exerciseName: {
+    fontSize: 16,
+    color: '#333333',
+    width: '30%',
+  },
+  exerciseProgress: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 4,
+    marginHorizontal: 12,
+    overflow: 'hidden',
+  },
+  progressIndicator: {
+    height: '100%',
+    backgroundColor: '#4CAF50',
+    borderRadius: 4,
+  },
+  exerciseCount: {
+    fontSize: 14,
+    color: '#666666',
+    width: '20%',
+    textAlign: 'right',
+  },
+  startButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  completedButton: {
+    backgroundColor: '#9E9E9E',
+  },
+  startButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  profileButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  profileButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#333333',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });

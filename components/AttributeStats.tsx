@@ -1,28 +1,17 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { UserAttributes } from '../utils/mockData';
-import { useTheme } from '../utils/ThemeContext';
 
 interface AttributeStatsProps {
   attributes: UserAttributes;
 }
 
 export default function AttributeStats({ attributes }: AttributeStatsProps) {
-  const { theme } = useTheme();
-  
-  // Ensure attributes exist and have valid values
-  const safeAttributes = {
-    strength: attributes?.strength || 1,
-    endurance: attributes?.endurance || 1,
-    agility: attributes?.agility || 1,
-    willpower: attributes?.willpower || 1
-  };
-  
   const maxAttribute = Math.max(
-    safeAttributes.strength,
-    safeAttributes.endurance,
-    safeAttributes.agility,
-    safeAttributes.willpower
+    attributes.strength,
+    attributes.endurance,
+    attributes.agility,
+    attributes.willpower
   );
   
   const getAttributeBarWidth = (value: number): string => {
@@ -30,71 +19,63 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.card }]}>
-      <Text style={[styles.title, { color: theme.text }]}>Hunter Attributes</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Hunter Attributes</Text>
       
       <View style={styles.attributeRow}>
-        <Text style={[styles.attributeLabel, { color: theme.textSecondary }]}>Strength</Text>
-        <View style={[styles.attributeBarContainer, { backgroundColor: theme.background }]}>
+        <Text style={styles.attributeLabel}>Strength</Text>
+        <View style={styles.attributeBarContainer}>
           <View 
             style={[
               styles.attributeBar, 
               styles.strengthBar,
-              { width: getAttributeBarWidth(safeAttributes.strength) }
+              { width: getAttributeBarWidth(attributes.strength) }
             ]} 
           />
         </View>
-        <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
-          {safeAttributes.strength.toFixed(1)}
-        </Text>
+        <Text style={styles.attributeValue}>{attributes.strength.toFixed(1)}</Text>
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={[styles.attributeLabel, { color: theme.textSecondary }]}>Endurance</Text>
-        <View style={[styles.attributeBarContainer, { backgroundColor: theme.background }]}>
+        <Text style={styles.attributeLabel}>Endurance</Text>
+        <View style={styles.attributeBarContainer}>
           <View 
             style={[
               styles.attributeBar, 
               styles.enduranceBar,
-              { width: getAttributeBarWidth(safeAttributes.endurance) }
+              { width: getAttributeBarWidth(attributes.endurance) }
             ]} 
           />
         </View>
-        <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
-          {safeAttributes.endurance.toFixed(1)}
-        </Text>
+        <Text style={styles.attributeValue}>{attributes.endurance.toFixed(1)}</Text>
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={[styles.attributeLabel, { color: theme.textSecondary }]}>Agility</Text>
-        <View style={[styles.attributeBarContainer, { backgroundColor: theme.background }]}>
+        <Text style={styles.attributeLabel}>Agility</Text>
+        <View style={styles.attributeBarContainer}>
           <View 
             style={[
               styles.attributeBar, 
               styles.agilityBar,
-              { width: getAttributeBarWidth(safeAttributes.agility) }
+              { width: getAttributeBarWidth(attributes.agility) }
             ]} 
           />
         </View>
-        <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
-          {safeAttributes.agility.toFixed(1)}
-        </Text>
+        <Text style={styles.attributeValue}>{attributes.agility.toFixed(1)}</Text>
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={[styles.attributeLabel, { color: theme.textSecondary }]}>Willpower</Text>
-        <View style={[styles.attributeBarContainer, { backgroundColor: theme.background }]}>
+        <Text style={styles.attributeLabel}>Willpower</Text>
+        <View style={styles.attributeBarContainer}>
           <View 
             style={[
               styles.attributeBar, 
               styles.willpowerBar,
-              { width: getAttributeBarWidth(safeAttributes.willpower) }
+              { width: getAttributeBarWidth(attributes.willpower) }
             ]} 
           />
         </View>
-        <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
-          {safeAttributes.willpower.toFixed(1)}
-        </Text>
+        <Text style={styles.attributeValue}>{attributes.willpower.toFixed(1)}</Text>
       </View>
     </View>
   );
@@ -102,10 +83,11 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -114,6 +96,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333333',
     marginBottom: 16,
   },
   attributeRow: {
@@ -124,10 +107,12 @@ const styles = StyleSheet.create({
   attributeLabel: {
     width: 80,
     fontSize: 14,
+    color: '#555555',
   },
   attributeBarContainer: {
     flex: 1,
     height: 12,
+    backgroundColor: '#f0f0f0',
     borderRadius: 6,
     marginHorizontal: 8,
     overflow: 'hidden',
@@ -151,6 +136,7 @@ const styles = StyleSheet.create({
   attributeValue: {
     width: 40,
     fontSize: 14,
+    color: '#555555',
     textAlign: 'right',
   },
 });

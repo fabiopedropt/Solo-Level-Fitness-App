@@ -1,124 +1,370 @@
-import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { useTheme } from '../utils/ThemeContext';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { UserProgress, initialUserProgress } from '../utils/mockData';
+import { getUserProgress, saveUserProgress } from '../utils/storage';
+import { useNavigation } from '@react-navigation/native';
+import MonthlyAnalyticsChart from '../components/MonthlyAnalyticsChart';
+import AttributeStats from '../components/AttributeStats';
 import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
 
 export default function ProfileScreen() {
-  const { theme } = useTheme();
+  const navigation = useNavigation();
   const { isPremium } = useSubscription();
-  
+  const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      // Get user progress data
+      const progressData = await getUserProgress();
+      
+      // Ensure all required fields exist
+      const validatedProgress = validateProgressData(progressData);
+      
+      setProgress(validatedProgress);
+      setError(null);
+    } catch (error) {
+      console.error('Error loading progress data:', error);
+      setError('Failed to load profile data. Please try again.');
+      
+      // Use initial progress as fallback
+      setProgress(initialUserProgress);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Validate and fix any missing fields in the progress data
+  const validateProgressData = (data: any): UserProgress => {
+    // Create a complete progress object with default values for any missing fields
+    const validatedProgress: UserProgress = {
+      streakDays: data.streakDays ?? initialUserProgress.streakDays,
+      totalWorkoutsCompleted: data.totalWorkoutsCompleted ?? initialUserProgress.totalWorkoutsCompleted,
+      lastCompletedDate: data.lastCompletedDate ?? initialUserProgress.lastCompletedDate,
+      level: data.level ?? initialUserProgress.level,
+      experience: data.experience ?? initialUserProgress.experience,
+      experienceToNextLevel: data.experienceToNextLevel ?? initialUserProgress.experienceToNextLevel,
+      monthlyWorkouts: data.monthlyWorkouts ?? initialUserProgress.monthlyWorkouts,
+      attributes: {
+        strength: data.attributes?.strength ?? initialUserProgress.attributes.strength,
+        endurance: data.attributes?.endurance ?? initialUserProgress.attributes.endurance,
+        agility: data.attributes?.agility ?? initialUserProgress.attributes.agility,
+        willpower: data.attributes?.willpower ?? initialUserProgress.attributes.willpower,
+      }
+    };
+    
+    // Save the validated data back to storage
+    saveUserProgress(validatedProgress);
+    
+    return validatedProgress;
+  };
+
+  const resetProgress = async () => {
+    if (!progress) return;
+    
+    Alert.alert(
+      "Reset Progress",
+      "Are you sure you want to reset all your progress? This cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            await saveUserProgress(initialUserProgress);
+            setProgress(initialUserProgress);
+          }
+        }
+      ]
+    );
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading profile data...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadData}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>Your Profile</Text>
-        
-        {!isPremium && <AdBanner />}
-        
-        <View style={[styles.card, { backgroundColor: theme.levelCard }]}>
-          <Text style={[styles.levelLabel, { color: theme.levelCardText }]}>HUNTER LEVEL</Text>
-          <Text style={[styles.levelValue, { color: theme.primary }]}>5</Text>
-          <View style={[styles.progressBar, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}>
-            <View style={[styles.progress, { width: '50%', backgroundColor: theme.primary }]} />
-          </View>
-          <Text style={[styles.progressText, { color: theme.levelCardText }]}>250/500 XP</Text>
-        </View>
-        
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Training Stats</Text>
-          <View style={styles.statRow}>
-            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Total Workouts:</Text>
-            <Text style={[styles.statValue, { color: theme.text }]}>45</Text>
-          </View>
-          <View style={styles.statRow}>
-            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Current Streak:</Text>
-            <Text style={[styles.statValue, { color: theme.text }]}>7 days</Text>
-          </View>
-          <View style={styles.statRow}>
-            <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Last Workout:</Text>
-            <Text style={[styles.statValue, { color: theme.text }]}>Today</Text>
-          </View>
-        </View>
-        
-        <TouchableOpacity style={[styles.button, { backgroundColor: theme.error }]}>
-          <Text style={styles.buttonText}>Reset Progress</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Your Profile</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.closeButton}>Close</Text>
         </TouchableOpacity>
-      </ScrollView>
-    </View>
+      </View>
+
+      {progress && (
+        <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+          {!isPremium && <AdBanner />}
+          
+          <View style={styles.levelCard}>
+            <Text style={styles.levelLabel}>HUNTER LEVEL</Text>
+            <Text style={styles.levelValue}>{progress.level}</Text>
+            <View style={styles.expBarContainer}>
+              <View 
+                style={[
+                  styles.expBar, 
+                  { width: `${(progress.experience / progress.experienceToNextLevel) * 100}%` }
+                ]} 
+              />
+            </View>
+            <Text style={styles.expText}>
+              {progress.experience} / {progress.experienceToNextLevel} XP
+            </Text>
+          </View>
+          
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{progress.streakDays}</Text>
+              <Text style={styles.statLabel}>Current Streak</Text>
+            </View>
+            
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{progress.totalWorkoutsCompleted}</Text>
+              <Text style={styles.statLabel}>Total Workouts</Text>
+            </View>
+          </View>
+          
+          <AttributeStats attributes={progress.attributes} />
+          
+          <MonthlyAnalyticsChart monthlyWorkouts={progress.monthlyWorkouts} />
+          
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>Last Completed Workout</Text>
+            <Text style={styles.infoValue}>
+              {progress.lastCompletedDate || 'No workouts completed yet'}
+            </Text>
+          </View>
+          
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>Solo Leveling Training</Text>
+            <Text style={styles.infoDescription}>
+              This training regimen is inspired by the daily workout routine from Solo Leveling:
+            </Text>
+            <View style={styles.exerciseList}>
+              <Text style={styles.exerciseItem}>• 100 Push-ups</Text>
+              <Text style={styles.exerciseItem}>• 100 Squats</Text>
+              <Text style={styles.exerciseItem}>• 10km Running</Text>
+              <Text style={styles.exerciseItem}>• 100 Sit-ups</Text>
+            </View>
+            <Text style={styles.infoDescription}>
+              Complete this workout every day to build your strength and endurance!
+            </Text>
+          </View>
+          
+          <TouchableOpacity style={styles.resetButton} onPress={resetProgress}>
+            <Text style={styles.resetButtonText}>Reset Progress</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  content: {
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#ffffff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 24,
+    color: '#333333',
   },
-  card: {
+  closeButton: {
+    fontSize: 16,
+    color: '#2196F3',
+  },
+  content: {
+    flex: 1,
+  },
+  contentContainer: {
     padding: 16,
+    paddingBottom: 32,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#f44336',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  levelCard: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 12,
+    padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
   },
   levelLabel: {
     fontSize: 14,
+    color: '#ffffff',
     marginBottom: 4,
   },
   levelValue: {
     fontSize: 36,
     fontWeight: 'bold',
+    color: '#4a4ae0',
     marginBottom: 12,
   },
-  progressBar: {
+  expBarContainer: {
     height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 4,
     marginBottom: 8,
     overflow: 'hidden',
   },
-  progress: {
+  expBar: {
     height: '100%',
+    backgroundColor: '#4a4ae0',
     borderRadius: 4,
   },
-  progressText: {
+  expText: {
     fontSize: 12,
+    color: '#ffffff',
     textAlign: 'right',
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  statRow: {
+  statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  statLabel: {
-    fontSize: 16,
+  statCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 20,
+    flex: 1,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#333333',
   },
-  button: {
+  statLabel: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 4,
+  },
+  infoCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
     padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 8,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: '#555555',
+  },
+  infoDescription: {
+    fontSize: 14,
+    color: '#555555',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  exerciseList: {
+    marginVertical: 12,
+    paddingLeft: 8,
+  },
+  exerciseItem: {
+    fontSize: 14,
+    color: '#555555',
+    marginBottom: 4,
+  },
+  resetButton: {
+    backgroundColor: '#f44336',
     borderRadius: 8,
+    paddingVertical: 12,
     alignItems: 'center',
     marginTop: 8,
+    marginBottom: 24,
   },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+  resetButtonText: {
+    color: '#ffffff',
     fontSize: 16,
+    fontWeight: 'bold',
   },
 });

@@ -1,104 +1,170 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, Switch, TouchableOpacity } from 'react-native';
-import { useTheme } from '../utils/ThemeContext';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '../utils/SubscriptionContext';
 import { Ionicons } from '@expo/vector-icons';
 import AdBanner from '../components/AdBanner';
 
 export default function SettingsScreen() {
-  const { theme, isDark, toggleTheme } = useTheme();
-  const { isPremium, purchaseMonthly, purchaseYearly } = useSubscription();
-  
+  const { isPremium, purchaseMonthly, purchaseYearly, cancelSubscription } = useSubscription();
+
+  const handleResetProgress = () => {
+    Alert.alert(
+      "Reset Progress",
+      "Are you sure you want to reset all your progress? This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Reset", 
+          style: "destructive",
+          onPress: () => Alert.alert("Progress Reset", "All progress has been reset.") 
+        }
+      ]
+    );
+  };
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
-        
-        {!isPremium && <AdBanner />}
-        
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Appearance</Text>
-          <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Dark Mode</Text>
-            <Switch
-              value={isDark}
-              onValueChange={toggleTheme}
-              trackColor={{ false: '#767577', true: theme.primary }}
-              thumbColor="#f4f3f4"
-            />
-          </View>
-        </View>
-        
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Subscription</Text>
-          <Text style={[styles.subscriptionStatus, { color: theme.text }]}>
-            Status: {isPremium ? 'Premium' : 'Free'}
-          </Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Settings</Text>
+      </View>
+
+      <ScrollView style={styles.content}>
+        {!isPremium && <AdBanner size="large" />}
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Subscription</Text>
           
-          {!isPremium && (
-            <View style={styles.subscriptionOptions}>
-              <TouchableOpacity 
-                style={[styles.subscriptionButton, { backgroundColor: theme.primary }]}
-                onPress={purchaseMonthly}
-              >
-                <Text style={styles.buttonText}>Monthly (2€)</Text>
-              </TouchableOpacity>
+          <View style={styles.subscriptionStatus}>
+            <Text style={styles.statusLabel}>Status:</Text>
+            <Text style={[
+              styles.statusValue, 
+              { color: isPremium ? '#4CAF50' : '#666666' }
+            ]}>
+              {isPremium ? 'Premium' : 'Free'}
+            </Text>
+          </View>
+          
+          {isPremium && (
+            <>
+              <View style={styles.subscriptionInfo}>
+                <Text style={styles.infoLabel}>Plan:</Text>
+                <Text style={styles.infoValue}>Premium</Text>
+              </View>
               
               <TouchableOpacity 
-                style={[styles.subscriptionButton, { backgroundColor: theme.primary }]}
-                onPress={purchaseYearly}
+                style={styles.subscriptionButton}
+                onPress={cancelSubscription}
               >
-                <Text style={styles.buttonText}>Yearly (21.6€)</Text>
+                <Text style={styles.buttonText}>Cancel Subscription</Text>
               </TouchableOpacity>
-            </View>
+            </>
+          )}
+          
+          {!isPremium && (
+            <>
+              <View style={styles.planContainer}>
+                <View style={styles.planCard}>
+                  <Text style={styles.planTitle}>Monthly</Text>
+                  <Text style={styles.planPrice}>2€</Text>
+                  <Text style={styles.planPeriod}>per month</Text>
+                  <TouchableOpacity 
+                    style={styles.planButton}
+                    onPress={purchaseMonthly}
+                  >
+                    <Text style={styles.buttonText}>Subscribe</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <View style={styles.planCard}>
+                  <View style={styles.bestValueTag}>
+                    <Text style={styles.bestValueText}>SAVE 10%</Text>
+                  </View>
+                  <Text style={styles.planTitle}>Yearly</Text>
+                  <Text style={styles.planPrice}>21.6€</Text>
+                  <Text style={styles.planPeriod}>per year</Text>
+                  <TouchableOpacity 
+                    style={styles.planButton}
+                    onPress={purchaseYearly}
+                  >
+                    <Text style={styles.buttonText}>Subscribe</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </>
           )}
         </View>
-        
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>About</Text>
-          <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Version</Text>
-            <Text style={[styles.settingValue, { color: theme.textSecondary }]}>1.0.0</Text>
-          </View>
-          <TouchableOpacity style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Privacy Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Data Management</Text>
+          
+          <TouchableOpacity 
+            style={styles.settingRow}
+            onPress={handleResetProgress}
+          >
+            <Text style={styles.settingLabel}>Reset Progress</Text>
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>About</Text>
+          
+          <View style={styles.settingRow}>
+            <Text style={styles.settingLabel}>Version</Text>
+            <Text style={styles.versionText}>1.0.0</Text>
+          </View>
+          
           <TouchableOpacity style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: theme.text }]}>Terms of Service</Text>
-            <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+            <Text style={styles.settingLabel}>Privacy Policy</Text>
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.settingRow}>
+            <Text style={styles.settingLabel}>Terms of Service</Text>
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  content: {
+  header: {
     padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#ffffff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 24,
+    color: '#333333',
   },
-  card: {
+  content: {
+    flex: 1,
     padding: 16,
-    borderRadius: 8,
+  },
+  section: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
-  cardTitle: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333333',
     marginBottom: 16,
   },
   settingRow: {
@@ -111,27 +177,105 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 16,
-  },
-  settingValue: {
-    fontSize: 14,
+    color: '#333333',
   },
   subscriptionStatus: {
-    fontSize: 16,
-    marginBottom: 16,
+    flexDirection: 'row',
+    marginBottom: 12,
   },
-  subscriptionOptions: {
+  statusLabel: {
+    fontSize: 16,
+    color: '#666666',
+    marginRight: 8,
+  },
+  statusValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  subscriptionInfo: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#666666',
+    width: 80,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#333333',
+    flex: 1,
+  },
+  planContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  planCard: {
+    width: '48%',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    position: 'relative',
+  },
+  bestValueTag: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  bestValueText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  planTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 8,
+  },
+  planPrice: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4a4ae0',
+  },
+  planPeriod: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 16,
+  },
+  planButton: {
+    backgroundColor: '#4a4ae0',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    width: '100%',
+    alignItems: 'center',
   },
   subscriptionButton: {
-    flex: 1,
-    padding: 12,
+    backgroundColor: '#f44336',
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    marginHorizontal: 4,
+    marginTop: 16,
   },
   buttonText: {
-    color: 'white',
+    color: '#ffffff',
     fontWeight: 'bold',
+  },
+  versionText: {
+    fontSize: 14,
+    color: '#666666',
   },
 });

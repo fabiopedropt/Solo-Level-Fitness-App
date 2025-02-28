@@ -1,28 +1,49 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert } from 'react-native';
+import { getSubscription, saveSubscription } from './storage';
 
 interface SubscriptionContextType {
   isPremium: boolean;
-  purchaseSubscription: () => void;
+  purchaseMonthly: () => void;
+  purchaseYearly: () => void;
   cancelSubscription: () => void;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType>({
   isPremium: false,
-  purchaseSubscription: () => {},
+  purchaseMonthly: () => {},
+  purchaseYearly: () => {},
   cancelSubscription: () => {},
 });
 
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isPremium, setIsPremium] = useState(false);
 
-  const purchaseSubscription = () => {
+  useEffect(() => {
+    // Load subscription status on startup
+    const loadSubscription = async () => {
+      const premium = await getSubscription();
+      setIsPremium(premium);
+    };
+    
+    loadSubscription();
+  }, []);
+
+  const purchaseMonthly = async () => {
     setIsPremium(true);
-    Alert.alert('Success', 'You are now a premium user!');
+    await saveSubscription(true);
+    Alert.alert('Success', 'You have purchased the monthly subscription!');
   };
 
-  const cancelSubscription = () => {
+  const purchaseYearly = async () => {
+    setIsPremium(true);
+    await saveSubscription(true);
+    Alert.alert('Success', 'You have purchased the yearly subscription with 10% discount!');
+  };
+
+  const cancelSubscription = async () => {
     setIsPremium(false);
+    await saveSubscription(false);
     Alert.alert('Subscription Cancelled', 'Your premium features have been deactivated.');
   };
 
@@ -30,7 +51,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     <SubscriptionContext.Provider
       value={{
         isPremium,
-        purchaseSubscription,
+        purchaseMonthly,
+        purchaseYearly,
         cancelSubscription,
       }}
     >
