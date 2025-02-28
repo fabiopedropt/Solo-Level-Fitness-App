@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useFonts, OpenSans_400Regular, OpenSans_700Bold } from '@expo-google-fonts/open-sans';
+import { Text, View, ActivityIndicator } from 'react-native';
 import HomeScreen from './screens/HomeScreen';
 import WorkoutScreen from './screens/WorkoutScreen';
 import ProfileScreen from './screens/ProfileScreen';
@@ -45,13 +47,18 @@ function TabNavigator() {
             iconName = focused ? 'settings' : 'settings-outline';
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          // Return the icon component with the correct name
+          return <Ionicons name={iconName as any} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#4a4ae0',
         tabBarInactiveTintColor: '#666666',
         tabBarStyle: {
           backgroundColor: '#ffffff',
           borderTopColor: '#e0e0e0',
+        },
+        tabBarLabelStyle: {
+          fontFamily: 'OpenSans_400Regular',
+          fontSize: 12,
         },
       })}
     >
@@ -64,6 +71,22 @@ function TabNavigator() {
 }
 
 export default function App() {
+  // Load the Open Sans fonts
+  const [fontsLoaded] = useFonts({
+    OpenSans_400Regular,
+    OpenSans_700Bold,
+  });
+
+  // Show a loading screen while fonts are loading
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
+        <ActivityIndicator size="large" color="#4a4ae0" />
+        <Text style={{ marginTop: 16, color: '#333333' }}>Loading fonts...</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <SubscriptionProvider>

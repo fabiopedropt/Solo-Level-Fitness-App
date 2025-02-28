@@ -1,0 +1,52 @@
+// Import the typography styles
+import { typography } from '../utils/typography';
+
+// Update the styles object to use the typography styles
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  scrollContent: {
+    padding: 16,
+  },
+  header: {
+    marginBottom: 16,
+  },
+  title: {
+    ...typography.title,
+    fontSize: 28,
+  },
+  date: {
+    ...typography.bodySmall,
+    marginTop: 4,
+  },
+  levelContainer: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  levelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  levelLabel: {
+    fontFamily: 'OpenSans_400Regular',
+    fontSize: 16,
+    color: '#ffffff',
+    marginRight: 8,
+  },
+  levelValue: {
+    fontFamily: 'OpenSans_700Bold',
+    fontSize: 24,
+    color: '#4a4ae0',
+  },
+  // ... continue updating the rest of the styles
+});

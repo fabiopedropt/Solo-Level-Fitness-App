@@ -1,0 +1,18 @@
+import { typography } from '../utils/typography';
+
+const styles = StyleSheet.create({
+  // ...
+  title: {
+    ...typography.subtitle,
+    fontWeight: 'bold',
+  },
+  progress: {
+    ...typography.body,
+    color: '#555555',
+  },
+  // ...
+  instructionsText: {
+    ...typography.bodySmall,
+    color: '#555555',
+  },
+});
