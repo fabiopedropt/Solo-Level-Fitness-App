@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SubscriptionProvider } from './utils/SubscriptionContext';
+import { ThemeProvider } from './utils/ThemeContext'; // Import ThemeProvider
 import HomeScreen from './screens/HomeScreen';
 import StatsScreen from './screens/StatsScreen';
 import ProfileScreen from './screens/ProfileScreen';
@@ -60,37 +61,39 @@ function SettingsStackScreen() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <SubscriptionProvider>
-        <NavigationContainer>
-          <Tab.Navigator
-            screenOptions={({ route }) => ({
-              headerShown: false,
-              tabBarActiveTintColor: '#4a4ae0',
-              tabBarInactiveTintColor: 'gray',
-              tabBarIcon: ({ focused, color, size }) => {
-                let iconName = 'help-circle';
-                
-                if (route.name === 'Home') {
-                  iconName = focused ? 'home' : 'home-outline';
-                } else if (route.name === 'Stats') {
-                  iconName = focused ? 'stats-chart' : 'stats-chart-outline';
-                } else if (route.name === 'Profile') {
-                  iconName = focused ? 'person' : 'person-outline';
-                } else if (route.name === 'Settings') {
-                  iconName = focused ? 'settings' : 'settings-outline';
-                }
-                
-                return <Icon.Ionicons name={iconName} size={size} color={color} />;
-              },
-            })}
-          >
-            <Tab.Screen name="Home" component={HomeStackScreen} />
-            <Tab.Screen name="Stats" component={StatsStackScreen} />
-            <Tab.Screen name="Profile" component={ProfileStackScreen} />
-            <Tab.Screen name="Settings" component={SettingsStackScreen} />
-          </Tab.Navigator>
-        </NavigationContainer>
-      </SubscriptionProvider>
+      <ThemeProvider> {/* Add ThemeProvider */}
+        <SubscriptionProvider>
+          <NavigationContainer>
+            <Tab.Navigator
+              screenOptions={({ route }) => ({
+                headerShown: false,
+                tabBarActiveTintColor: '#4a4ae0',
+                tabBarInactiveTintColor: 'gray',
+                tabBarIcon: ({ focused, color, size }) => {
+                  let iconName = 'help-circle';
+                  
+                  if (route.name === 'Home') {
+                    iconName = focused ? 'home' : 'home-outline';
+                  } else if (route.name === 'Stats') {
+                    iconName = focused ? 'stats-chart' : 'stats-chart-outline';
+                  } else if (route.name === 'Profile') {
+                    iconName = focused ? 'person' : 'person-outline';
+                  } else if (route.name === 'Settings') {
+                    iconName = focused ? 'settings' : 'settings-outline';
+                  }
+                  
+                  return <Icon.Ionicons name={iconName} size={size} color={color} />;
+                },
+              })}
+            >
+              <Tab.Screen name="Home" component={HomeStackScreen} />
+              <Tab.Screen name="Stats" component={StatsStackScreen} />
+              <Tab.Screen name="Profile" component={ProfileStackScreen} />
+              <Tab.Screen name="Settings" component={SettingsScreen} />
+            </Tab.Navigator>
+          </NavigationContainer>
+        </SubscriptionProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
