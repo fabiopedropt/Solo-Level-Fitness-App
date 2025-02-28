@@ -1,0 +1,49 @@
+// Add this to the imports
+import { useAuth } from '../utils/AuthContext';
+
+// Add this inside the component
+const { user, signOut } = useAuth();
+
+// Add this to the card with user info
+<View style={styles.card}>
+  <View style={styles.cardTitleContainer}>
+    <Icon.Ionicons name="person-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+    <Text style={styles.cardTitle}>Account</Text>
+  </View>
+  
+  <Text style={styles.cardText}>
+    Name: {user?.user_metadata?.name || 'User'}
+  </Text>
+  
+  <Text style={styles.cardText}>
+    Email: {user?.email || 'No email'}
+  </Text>
+  
+  <TouchableOpacity 
+    style={styles.profileButton}
+    onPress={() => navigation.navigate('ChangePassword')}
+  >
+    <Text style={styles.profileButtonText}>Change Password</Text>
+  </TouchableOpacity>
+  
+  <TouchableOpacity 
+    style={[styles.profileButton, { backgroundColor: '#f44336', marginTop: 8 }]}
+    onPress={signOut}
+  >
+    <Text style={styles.profileButtonText}>Sign Out</Text>
+  </TouchableOpacity>
+</View>
+
+// Add these styles
+profileButton: {
+  backgroundColor: '#4a4ae0',
+  borderRadius: 8,
+  paddingVertical: 10,
+  alignItems: 'center',
+  marginTop: 16,
+},
+profileButtonText: {
+  color: '#ffffff',
+  fontSize: 14,
+  fontWeight: 'bold',
+},
