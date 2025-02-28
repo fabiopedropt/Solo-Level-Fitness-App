@@ -1,9 +1,0 @@
-const handleWorkoutComplete = () => {
-  // Show interstitial ad with 30% probability
-  if (!isPremium && Math.random() < 0.3) {
-    AdService.showInterstitial();
-  }
-  
-  // Continue with normal flow
-  navigation.navigate('HomeMain');
-};

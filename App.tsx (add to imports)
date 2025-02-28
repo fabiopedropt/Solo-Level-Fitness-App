@@ -1,7 +1,0 @@
-import { AdService } from './utils/AdService';
-
-// Add this inside the App component before the return statement
-React.useEffect(() => {
-  // Initialize ads
-  AdService.initialize();
-}, []);

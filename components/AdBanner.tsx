@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useSubscription } from '../utils/SubscriptionContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useSubscription } from '../utils/SubscriptionContext';
 
 interface AdBannerProps {
   size?: 'banner' | 'large';
@@ -16,7 +16,7 @@ export default function AdBanner({ size = 'banner' }: AdBannerProps) {
   
   return (
     <View style={[styles.container, size === 'large' ? styles.largeBanner : styles.smallBanner]}>
-      <Ionicons name="megaphone-outline" size={16} color="#666666" style={styles.icon} />
+      <Ionicons name="megaphone-outline" size={16} color="#666" style={styles.icon} />
       <Text style={styles.adText}>
         {size === 'large' 
           ? 'This is a simulated full-width advertisement' 
