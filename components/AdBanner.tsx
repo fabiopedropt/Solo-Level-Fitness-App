@@ -3,36 +3,22 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSubscription } from '../utils/SubscriptionContext';
 import { useTheme } from '../utils/ThemeContext';
 
-interface AdBannerProps {
-  size?: 'banner' | 'large';
-}
-
-export default function AdBanner({ size = 'banner' }: AdBannerProps) {
-  const { isPremium } = useSubscription();
+export default function AdBanner() {
+  const { isPremium, purchaseMonthly } = useSubscription();
   const { theme } = useTheme();
   
   if (isPremium) {
-    return null; // Don't show ads for premium users
+    return null;
   }
   
   return (
-    <View 
-      style={[
-        styles.container, 
-        size === 'large' ? styles.largeBanner : styles.smallBanner,
-        { backgroundColor: theme.card, borderColor: theme.border }
-      ]}
-    >
-      <Text style={[styles.adText, { color: theme.textSecondary }]}>
-        {size === 'large' 
-          ? 'This is a simulated full-width advertisement' 
-          : 'This is a simulated advertisement'}
-      </Text>
+    <View style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border }]}>
+      <Text style={[styles.text, { color: theme.text }]}>This is an advertisement</Text>
       <TouchableOpacity 
-        style={[styles.upgradeButton, { backgroundColor: theme.primary }]}
-        onPress={() => {}}
+        style={[styles.button, { backgroundColor: theme.primary }]}
+        onPress={purchaseMonthly}
       >
-        <Text style={styles.upgradeButtonText}>Remove Ads</Text>
+        <Text style={styles.buttonText}>Remove Ads</Text>
       </TouchableOpacity>
     </View>
   );
@@ -40,31 +26,22 @@ export default function AdBanner({ size = 'banner' }: AdBannerProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 1,
+    padding: 16,
+    margin: 16,
     borderRadius: 8,
-    padding: 8,
+    borderWidth: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 8,
   },
-  smallBanner: {
-    height: 60,
+  text: {
+    marginBottom: 8,
   },
-  largeBanner: {
-    height: 100,
-  },
-  adText: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  upgradeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+  button: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 4,
   },
-  upgradeButtonText: {
-    color: '#fff',
-    fontSize: 10,
+  buttonText: {
+    color: 'white',
     fontWeight: 'bold',
   },
 });
