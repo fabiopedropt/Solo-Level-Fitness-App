@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '../utils/SubscriptionContext';
 
 interface AdBannerProps {
@@ -15,6 +16,7 @@ export default function AdBanner({ size = 'banner' }: AdBannerProps) {
   
   return (
     <View style={[styles.container, size === 'large' ? styles.largeBanner : styles.smallBanner]}>
+      <Ionicons name="megaphone-outline" size={16} color="#666" style={styles.icon} />
       <Text style={styles.adText}>
         {size === 'large' 
           ? 'This is a simulated full-width advertisement' 
@@ -39,6 +41,8 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     alignSelf: 'center',
     width: '90%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   smallBanner: {
     height: 60,
@@ -46,10 +50,15 @@ const styles = StyleSheet.create({
   largeBanner: {
     height: 100,
   },
+  icon: {
+    marginRight: 4,
+  },
   adText: {
     fontSize: 12,
     color: '#666666',
     marginBottom: 4,
+    flex: 1,
+    textAlign: 'center',
   },
   upgradeButton: {
     backgroundColor: '#4a4ae0',

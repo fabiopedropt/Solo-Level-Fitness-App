@@ -1,6 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { Alert } from 'react-native';
-import { getSubscription, saveSubscription } from './storage';
 
 interface SubscriptionContextType {
   isPremium: boolean;
@@ -19,31 +18,18 @@ const SubscriptionContext = createContext<SubscriptionContextType>({
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isPremium, setIsPremium] = useState(false);
 
-  useEffect(() => {
-    // Load subscription status on startup
-    const loadSubscription = async () => {
-      const premium = await getSubscription();
-      setIsPremium(premium);
-    };
-    
-    loadSubscription();
-  }, []);
-
-  const purchaseMonthly = async () => {
+  const purchaseMonthly = () => {
     setIsPremium(true);
-    await saveSubscription(true);
     Alert.alert('Success', 'You have purchased the monthly subscription!');
   };
 
-  const purchaseYearly = async () => {
+  const purchaseYearly = () => {
     setIsPremium(true);
-    await saveSubscription(true);
     Alert.alert('Success', 'You have purchased the yearly subscription with 10% discount!');
   };
 
-  const cancelSubscription = async () => {
+  const cancelSubscription = () => {
     setIsPremium(false);
-    await saveSubscription(false);
     Alert.alert('Subscription Cancelled', 'Your premium features have been deactivated.');
   };
 
