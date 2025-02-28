@@ -1,8 +1,8 @@
 {
   "expo": {
     "owner": "appacella",
-    "name": "Solo Leveling Training",
-    "slug": "solo-leveling-training",
+    "name": "user-app",
+    "slug": "user-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,13 +19,13 @@
     "android": {
       "package": "com.appacella.userapp",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/appacella-logo-white.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/images/favicon.png"
     }
   }
 }
