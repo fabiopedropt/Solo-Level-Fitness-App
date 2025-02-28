@@ -3,35 +3,35 @@ import { Alert } from 'react-native';
 
 interface SubscriptionContextType {
   isPremium: boolean;
-  purchaseMonthly: () => void;
-  purchaseYearly: () => void;
+  purchaseSubscription: () => void;
+  cancelSubscription: () => void;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType>({
   isPremium: false,
-  purchaseMonthly: () => {},
-  purchaseYearly: () => {},
+  purchaseSubscription: () => {},
+  cancelSubscription: () => {},
 });
 
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isPremium, setIsPremium] = useState(false);
 
-  const purchaseMonthly = () => {
+  const purchaseSubscription = () => {
     setIsPremium(true);
-    Alert.alert('Success', 'You have purchased the monthly subscription!');
+    Alert.alert('Success', 'You are now a premium user!');
   };
 
-  const purchaseYearly = () => {
-    setIsPremium(true);
-    Alert.alert('Success', 'You have purchased the yearly subscription!');
+  const cancelSubscription = () => {
+    setIsPremium(false);
+    Alert.alert('Subscription Cancelled', 'Your premium features have been deactivated.');
   };
 
   return (
     <SubscriptionContext.Provider
       value={{
         isPremium,
-        purchaseMonthly,
-        purchaseYearly,
+        purchaseSubscription,
+        cancelSubscription,
       }}
     >
       {children}

@@ -4,19 +4,26 @@ import { useSubscription } from '../utils/SubscriptionContext';
 import { useTheme } from '../utils/ThemeContext';
 
 export default function AdBanner() {
-  const { isPremium, purchaseMonthly } = useSubscription();
+  const { isPremium, purchaseSubscription } = useSubscription();
   const { theme } = useTheme();
   
   if (isPremium) {
-    return null;
+    return null; // Don't show ads for premium users
   }
   
   return (
-    <View style={[styles.container, { backgroundColor: theme.card, borderColor: theme.border }]}>
-      <Text style={[styles.text, { color: theme.text }]}>This is an advertisement</Text>
+    <View 
+      style={[
+        styles.container, 
+        { backgroundColor: theme.card, borderColor: theme.border }
+      ]}
+    >
+      <Text style={[styles.text, { color: theme.textSecondary }]}>
+        This is a simulated advertisement
+      </Text>
       <TouchableOpacity 
         style={[styles.button, { backgroundColor: theme.primary }]}
-        onPress={purchaseMonthly}
+        onPress={purchaseSubscription}
       >
         <Text style={styles.buttonText}>Remove Ads</Text>
       </TouchableOpacity>
@@ -26,22 +33,24 @@ export default function AdBanner() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    margin: 16,
-    borderRadius: 8,
     borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    margin: 16,
     alignItems: 'center',
   },
   text: {
+    fontSize: 14,
     marginBottom: 8,
   },
   button: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 4,
   },
   buttonText: {
-    color: 'white',
+    color: '#fff',
+    fontSize: 12,
     fontWeight: 'bold',
   },
 });
