@@ -1,52 +1,29 @@
-// Import the typography styles
-import { typography } from '../utils/typography';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Icon from '@expo/vector-icons';
+import { useSubscription } from '../utils/SubscriptionContext';
+import { useTheme } from '../utils/ThemeContext';
+import AdBanner from '../components/AdBanner';
+import LevelUpModal from '../components/LevelUpModal';
+// ... other imports
 
-// Update the styles object to use the typography styles
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  header: {
-    marginBottom: 16,
-  },
-  title: {
-    ...typography.title,
-    fontSize: 28,
-  },
-  date: {
-    ...typography.bodySmall,
-    marginTop: 4,
-  },
-  levelContainer: {
-    backgroundColor: '#1a1a2e',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  levelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  levelLabel: {
-    fontFamily: 'OpenSans_400Regular',
-    fontSize: 16,
-    color: '#ffffff',
-    marginRight: 8,
-  },
-  levelValue: {
-    fontFamily: 'OpenSans_700Bold',
-    fontSize: 24,
-    color: '#4a4ae0',
-  },
-  // ... continue updating the rest of the styles
-});
+export default function HomeScreen({ navigation }: any) {
+  const { isPremium } = useSubscription();
+  const { theme } = useTheme();
+  // ... rest of the component
+
+  return (
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
+      <ScrollView>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: theme.text }]}>Solo Leveling Training</Text>
+          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{getTodayDateString()}</Text>
+        </View>
+
+        {/* Apply theme to all components */}
+        {/* ... */}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

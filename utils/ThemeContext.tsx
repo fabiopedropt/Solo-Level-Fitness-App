@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Define theme colors
@@ -13,6 +12,11 @@ export const lightTheme = {
   accent: '#2196F3',
   border: '#e0e0e0',
   error: '#f44336',
+  levelCard: '#1a1a2e',
+  levelCardText: '#ffffff',
+  quoteBackground: '#1a1a2e',
+  quoteText: '#ffffff',
+  quoteAuthor: '#aaaaaa',
 };
 
 export const darkTheme = {
@@ -25,6 +29,11 @@ export const darkTheme = {
   accent: '#42a5f5',
   border: '#333333',
   error: '#e57373',
+  levelCard: '#2a2a4e',
+  levelCardText: '#ffffff',
+  quoteBackground: '#2a2a4e',
+  quoteText: '#ffffff',
+  quoteAuthor: '#cccccc',
 };
 
 export type Theme = typeof lightTheme;
@@ -44,23 +53,17 @@ const ThemeContext = createContext<ThemeContextType>({
 const THEME_PREFERENCE_KEY = 'solo_leveling_theme_preference';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const deviceTheme = useColorScheme();
-  const [isDark, setIsDark] = useState(deviceTheme === 'dark');
-  const [theme, setTheme] = useState<Theme>(isDark ? darkTheme : lightTheme);
+  const [isDark, setIsDark] = useState(false);
+  const [theme, setTheme] = useState<Theme>(lightTheme);
   
   // Load saved theme preference
   useEffect(() => {
     const loadThemePreference = async () => {
       try {
         const savedTheme = await AsyncStorage.getItem(THEME_PREFERENCE_KEY);
-        if (savedTheme) {
-          const isDarkMode = savedTheme === 'dark';
-          setIsDark(isDarkMode);
-          setTheme(isDarkMode ? darkTheme : lightTheme);
-        } else {
-          // Use device theme as default
-          setIsDark(deviceTheme === 'dark');
-          setTheme(deviceTheme === 'dark' ? darkTheme : lightTheme);
+        if (savedTheme === 'dark') {
+          setIsDark(true);
+          setTheme(darkTheme);
         }
       } catch (error) {
         console.error('Error loading theme preference:', error);
@@ -68,7 +71,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     
     loadThemePreference();
-  }, [deviceTheme]);
+  }, []);
   
   const toggleTheme = async () => {
     try {
