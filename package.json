@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:web": "expo export:web",
-    "deploy:cloudflare": "yarn install --frozen-lockfile=false && yarn build:web"
+    "deploy:cloudflare": "npx expo export:web"
   },
   "dependencies": {
     "@expo-google-fonts/open-sans": "^0.2.3",
