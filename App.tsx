@@ -1,11 +1,9 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SubscriptionProvider } from './utils/SubscriptionContext';
-import { ThemeProvider, useTheme } from './utils/ThemeContext';
 import HomeScreen from './screens/HomeScreen';
 import StatsScreen from './screens/StatsScreen';
 import ProfileScreen from './screens/ProfileScreen';
@@ -59,66 +57,40 @@ function SettingsStackScreen() {
   );
 }
 
-function AppContent() {
-  const { theme, isDark } = useTheme();
-  
-  return (
-    <NavigationContainer
-      theme={{
-        dark: isDark,
-        colors: {
-          primary: theme.primary,
-          background: theme.background,
-          card: theme.card,
-          text: theme.text,
-          border: theme.border,
-          notification: theme.primary,
-        },
-      }}
-    >
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarActiveTintColor: theme.primary,
-          tabBarInactiveTintColor: theme.textSecondary,
-          tabBarStyle: {
-            backgroundColor: theme.card,
-            borderTopColor: theme.border,
-          },
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName = 'help-circle';
-            
-            if (route.name === 'Home') {
-              iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'Stats') {
-              iconName = focused ? 'stats-chart' : 'stats-chart-outline';
-            } else if (route.name === 'Profile') {
-              iconName = focused ? 'person' : 'person-outline';
-            } else if (route.name === 'Settings') {
-              iconName = focused ? 'settings' : 'settings-outline';
-            }
-            
-            return <Icon.Ionicons name={iconName} size={size} color={color} />;
-          },
-        })}
-      >
-        <Tab.Screen name="Home" component={HomeStackScreen} />
-        <Tab.Screen name="Stats" component={StatsStackScreen} />
-        <Tab.Screen name="Profile" component={ProfileStackScreen} />
-        <Tab.Screen name="Settings" component={SettingsStackScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
-  );
-}
-
 export default function App() {
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
-        <SubscriptionProvider>
-          <AppContent />
-        </SubscriptionProvider>
-      </ThemeProvider>
+      <SubscriptionProvider>
+        <NavigationContainer>
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarActiveTintColor: '#4a4ae0',
+              tabBarInactiveTintColor: 'gray',
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName = 'help-circle';
+                
+                if (route.name === 'Home') {
+                  iconName = focused ? 'home' : 'home-outline';
+                } else if (route.name === 'Stats') {
+                  iconName = focused ? 'stats-chart' : 'stats-chart-outline';
+                } else if (route.name === 'Profile') {
+                  iconName = focused ? 'person' : 'person-outline';
+                } else if (route.name === 'Settings') {
+                  iconName = focused ? 'settings' : 'settings-outline';
+                }
+                
+                return <Icon.Ionicons name={iconName} size={size} color={color} />;
+              },
+            })}
+          >
+            <Tab.Screen name="Home" component={HomeStackScreen} />
+            <Tab.Screen name="Stats" component={StatsStackScreen} />
+            <Tab.Screen name="Profile" component={ProfileStackScreen} />
+            <Tab.Screen name="Settings" component={SettingsStackScreen} />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </SubscriptionProvider>
     </SafeAreaProvider>
   );
 }
