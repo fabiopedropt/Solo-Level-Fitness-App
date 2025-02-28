@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { UserProgress } from '../utils/mockData';
+import { UserProgress, initialUserProgress } from '../utils/mockData';
 import { getUserProgress, saveUserProgress } from '../utils/storage';
 import { useNavigation } from '@react-navigation/native';
 import MonthlyAnalyticsChart from '../components/MonthlyAnalyticsChart';
@@ -11,6 +11,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -18,13 +19,48 @@ export default function ProfileScreen() {
 
   const loadData = async () => {
     try {
+      // Get user progress data
       const progressData = await getUserProgress();
-      setProgress(progressData);
+      
+      // Ensure all required fields exist
+      const validatedProgress = validateProgressData(progressData);
+      
+      setProgress(validatedProgress);
+      setError(null);
     } catch (error) {
       console.error('Error loading progress data:', error);
+      setError('Failed to load profile data. Please try again.');
+      
+      // Use initial progress as fallback
+      setProgress(initialUserProgress);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Validate and fix any missing fields in the progress data
+  const validateProgressData = (data: any): UserProgress => {
+    // Create a complete progress object with default values for any missing fields
+    const validatedProgress: UserProgress = {
+      streakDays: data.streakDays ?? initialUserProgress.streakDays,
+      totalWorkoutsCompleted: data.totalWorkoutsCompleted ?? initialUserProgress.totalWorkoutsCompleted,
+      lastCompletedDate: data.lastCompletedDate ?? initialUserProgress.lastCompletedDate,
+      level: data.level ?? initialUserProgress.level,
+      experience: data.experience ?? initialUserProgress.experience,
+      experienceToNextLevel: data.experienceToNextLevel ?? initialUserProgress.experienceToNextLevel,
+      monthlyWorkouts: data.monthlyWorkouts ?? initialUserProgress.monthlyWorkouts,
+      attributes: {
+        strength: data.attributes?.strength ?? initialUserProgress.attributes.strength,
+        endurance: data.attributes?.endurance ?? initialUserProgress.attributes.endurance,
+        agility: data.attributes?.agility ?? initialUserProgress.attributes.agility,
+        willpower: data.attributes?.willpower ?? initialUserProgress.attributes.willpower,
+      }
+    };
+    
+    // Save the validated data back to storage
+    saveUserProgress(validatedProgress);
+    
+    return validatedProgress;
   };
 
   const resetProgress = async () => {
@@ -42,24 +78,8 @@ export default function ProfileScreen() {
           text: "Reset",
           style: "destructive",
           onPress: async () => {
-            const resetData: UserProgress = {
-              streakDays: 0,
-              totalWorkoutsCompleted: 0,
-              lastCompletedDate: null,
-              level: 1,
-              experience: 0,
-              experienceToNextLevel: 100,
-              monthlyWorkouts: {},
-              attributes: {
-                strength: 1,
-                endurance: 1,
-                agility: 1,
-                willpower: 1,
-              }
-            };
-            
-            await saveUserProgress(resetData);
-            setProgress(resetData);
+            await saveUserProgress(initialUserProgress);
+            setProgress(initialUserProgress);
           }
         }
       ]
@@ -69,7 +89,22 @@ export default function ProfileScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text>Loading...</Text>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading profile data...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadData}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -84,7 +119,7 @@ export default function ProfileScreen() {
       </View>
 
       {progress && (
-        <ScrollView style={styles.content}>
+        <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
           <View style={styles.levelCard}>
             <Text style={styles.levelLabel}>HUNTER LEVEL</Text>
             <Text style={styles.levelValue}>{progress.level}</Text>
@@ -173,7 +208,43 @@ const styles = StyleSheet.create({
     color: '#2196F3',
   },
   content: {
+    flex: 1,
+  },
+  contentContainer: {
     padding: 16,
+    paddingBottom: 32,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#f44336',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   levelCard: {
     backgroundColor: '#1a1a2e',

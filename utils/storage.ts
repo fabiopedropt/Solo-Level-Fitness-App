@@ -69,8 +69,22 @@ export const getUserProgress = async (): Promise<UserProgress> => {
   try {
     const progressJson = await AsyncStorage.getItem(USER_PROGRESS_KEY);
     if (progressJson) {
-      return JSON.parse(progressJson);
+      const parsedProgress = JSON.parse(progressJson);
+      
+      // Ensure the progress object has all required fields
+      const validatedProgress = {
+        ...initialUserProgress,
+        ...parsedProgress,
+        attributes: {
+          ...initialUserProgress.attributes,
+          ...(parsedProgress.attributes || {})
+        },
+        monthlyWorkouts: parsedProgress.monthlyWorkouts || {}
+      };
+      
+      return validatedProgress;
     }
+    
     // If no progress exists, use initial progress
     await saveUserProgress(initialUserProgress);
     return initialUserProgress;
@@ -107,6 +121,20 @@ export const getLevelUpNotification = async (): Promise<{ shown: boolean, level:
   }
 };
 
+// Clear all app data (for debugging)
+export const clearAllData = async (): Promise<void> => {
+  try {
+    await AsyncStorage.multiRemove([
+      DAILY_WORKOUT_KEY,
+      USER_PROGRESS_KEY,
+      LEVEL_UP_NOTIFICATION_KEY
+    ]);
+    console.log('All app data cleared');
+  } catch (error) {
+    console.error('Error clearing app data:', error);
+  }
+};
+
 // Update workout completion status and handle level up
 export const updateWorkoutCompletion = async (
   workout: DailyWorkout,
@@ -136,6 +164,11 @@ export const updateWorkoutCompletion = async (
     progress.totalWorkoutsCompleted += 1;
     progress.lastCompletedDate = today;
     
+    // Ensure monthlyWorkouts exists
+    if (!progress.monthlyWorkouts) {
+      progress.monthlyWorkouts = {};
+    }
+    
     // Update monthly workouts
     if (!progress.monthlyWorkouts[currentMonth]) {
       progress.monthlyWorkouts[currentMonth] = 0;
@@ -154,6 +187,11 @@ export const updateWorkoutCompletion = async (
     
     // Calculate attribute gains
     attributeGains = calculateAttributeGains(workout);
+    
+    // Ensure attributes exists
+    if (!progress.attributes) {
+      progress.attributes = initialUserProgress.attributes;
+    }
     
     // Update attributes
     Object.keys(attributeGains).forEach(key => {

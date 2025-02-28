@@ -1,0 +1,51 @@
+// For debugging - add this function to reset all data
+const resetAllData = async () => {
+  Alert.alert(
+    "Reset All Data",
+    "This will reset all app data. This is for debugging purposes only. Continue?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel"
+      },
+      {
+        text: "Reset",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await AsyncStorage.clear();
+            Alert.alert("Success", "All data has been reset. Please restart the app.");
+          } catch (error) {
+            console.error('Error clearing data:', error);
+            Alert.alert("Error", "Failed to reset data.");
+          }
+        }
+      }
+    ]
+  );
+};
+
+// Then add this somewhere in your JSX, perhaps at the bottom of the ScrollView:
+{__DEV__ && (
+  <TouchableOpacity 
+    style={styles.debugButton}
+    onPress={resetAllData}
+  >
+    <Text style={styles.debugButtonText}>Reset All Data (Debug)</Text>
+  </TouchableOpacity>
+)}
+
+// And add these styles:
+debugButton: {
+  backgroundColor: '#333',
+  borderRadius: 8,
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  alignSelf: 'center',
+  marginTop: 20,
+  marginBottom: 20,
+},
+debugButtonText: {
+  color: '#fff',
+  fontSize: 12,
+},
