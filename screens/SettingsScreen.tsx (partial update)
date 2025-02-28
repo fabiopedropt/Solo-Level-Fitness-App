@@ -8,36 +8,142 @@ import AdBanner from '../components/AdBanner';
 
 export default function SettingsScreen() {
   const { isPremium, purchaseMonthly, purchaseYearly, cancelSubscription } = useSubscription();
-  const { isDark, toggleTheme } = useTheme();
+  const { theme, isDark, toggleTheme } = useTheme();
 
-  // Rest of the component remains the same
+  const handleResetProgress = () => {
+    Alert.alert(
+      "Reset Progress",
+      "Are you sure you want to reset all your progress? This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Reset", 
+          style: "destructive",
+          onPress: () => Alert.alert("Progress Reset", "All progress has been reset.") 
+        }
+      ]
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView style={styles.scrollContent}>
         {!isPremium && <AdBanner size="large" />}
 
-        {/* Add this section for theme toggle */}
-        <View style={styles.card}>
+        {/* Theme Settings Section */}
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
           <View style={styles.cardTitleContainer}>
-            <Icon.Ionicons name="color-palette-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
-            <Text style={styles.cardTitle}>Appearance</Text>
+            <Icon.Ionicons name="color-palette-outline" size={20} color={theme.text} style={styles.cardTitleIcon} />
+            <Text style={[styles.cardTitle, { color: theme.text }]}>Appearance</Text>
           </View>
           
           <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Dark Mode</Text>
+            <Text style={[styles.settingLabel, { color: theme.text }]}>Dark Mode</Text>
             <Switch
               value={isDark}
               onValueChange={toggleTheme}
-              trackColor={{ false: '#767577', true: '#4a4ae0' }}
+              trackColor={{ false: '#767577', true: theme.primary }}
               thumbColor="#f4f3f4"
             />
           </View>
+          
+          <View style={styles.themePreview}>
+            <View style={[styles.themePreviewBox, { backgroundColor: isDark ? '#121212' : '#f5f5f5' }]}>
+              <Text style={[styles.themePreviewText, { color: isDark ? '#ffffff' : '#333333' }]}>
+                {isDark ? 'Dark Theme' : 'Light Theme'}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        {/* Rest of the component remains the same */}
-        {/* ... */}
+        {/* Subscription Section */}
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
+          <View style={styles.cardTitleContainer}>
+            <Icon.Ionicons name="card-outline" size={20} color={theme.text} style={styles.cardTitleIcon} />
+            <Text style={[styles.cardTitle, { color: theme.text }]}>Subscription</Text>
+          </View>
+          
+          <View style={styles.subscriptionStatus}>
+            <Icon.Ionicons 
+              name={isPremium ? "checkmark-circle" : "close-circle-outline"} 
+              size={20} 
+              color={isPremium ? theme.secondary : theme.textSecondary} 
+              style={styles.statusIcon} 
+            />
+            <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>Status:</Text>
+            <Text style={[
+              styles.statusValue, 
+              { color: isPremium ? theme.secondary : theme.textSecondary }
+            ]}>
+              {isPremium ? 'Premium' : 'Free'}
+            </Text>
+          </View>
+          
+          {/* Rest of the subscription section remains the same, just add theme styling */}
+          {/* ... */}
+        </View>
+
+        {/* Data Management Section */}
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
+          <View style={styles.cardTitleContainer}>
+            <Icon.Ionicons name="settings-outline" size={20} color={theme.text} style={styles.cardTitleIcon} />
+            <Text style={[styles.cardTitle, { color: theme.text }]}>Data Management</Text>
+          </View>
+          
+          <TouchableOpacity 
+            style={styles.settingRow}
+            onPress={handleResetProgress}
+          >
+            <Text style={[styles.settingLabel, { color: theme.text }]}>Reset Progress</Text>
+            <Icon.Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* About Section */}
+        <View style={[styles.card, { backgroundColor: theme.card }]}>
+          <View style={styles.cardTitleContainer}>
+            <Icon.Ionicons name="information-circle-outline" size={20} color={theme.text} style={styles.cardTitleIcon} />
+            <Text style={[styles.cardTitle, { color: theme.text }]}>About</Text>
+          </View>
+          
+          <View style={styles.settingRow}>
+            <Text style={[styles.settingLabel, { color: theme.text }]}>Version</Text>
+            <Text style={[styles.versionText, { color: theme.textSecondary }]}>1.0.0</Text>
+          </View>
+          
+          <TouchableOpacity style={styles.settingRow}>
+            <Text style={[styles.settingLabel, { color: theme.text }]}>Privacy Policy</Text>
+            <Icon.Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.settingRow}>
+            <Text style={[styles.settingLabel, { color: theme.text }]}>Terms of Service</Text>
+            <Icon.Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+// Add these new styles
+const styles = StyleSheet.create({
+  // ... existing styles ...
+  
+  themePreview: {
+    marginTop: 12,
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  themePreviewBox: {
+    width: '100%',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  themePreviewText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});

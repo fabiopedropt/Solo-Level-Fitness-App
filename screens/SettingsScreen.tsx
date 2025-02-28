@@ -1,14 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Icon from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '../utils/SubscriptionContext';
-import { useTheme } from '../utils/ThemeContext'; // Import useTheme
 import AdBanner from '../components/AdBanner';
 
 export default function SettingsScreen() {
   const { isPremium, purchaseMonthly, purchaseYearly, cancelSubscription } = useSubscription();
-  const { isDark, toggleTheme } = useTheme(); // Use the theme hook
 
   const handleResetProgress = () => {
     Alert.alert(
@@ -30,33 +28,14 @@ export default function SettingsScreen() {
       <ScrollView style={styles.scrollContent}>
         {!isPremium && <AdBanner size="large" />}
 
-        {/* Theme Settings Section */}
         <View style={styles.card}>
           <View style={styles.cardTitleContainer}>
-            <Icon.Ionicons name="color-palette-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
-            <Text style={styles.cardTitle}>Appearance</Text>
-          </View>
-          
-          <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Dark Mode</Text>
-            <Switch
-              value={isDark}
-              onValueChange={toggleTheme}
-              trackColor={{ false: '#767577', true: '#4a4ae0' }}
-              thumbColor="#f4f3f4"
-            />
-          </View>
-        </View>
-
-        {/* Subscription Section */}
-        <View style={styles.card}>
-          <View style={styles.cardTitleContainer}>
-            <Icon.Ionicons name="card-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+            <Ionicons name="card-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
             <Text style={styles.cardTitle}>Subscription</Text>
           </View>
           
           <View style={styles.subscriptionStatus}>
-            <Icon.Ionicons 
+            <Ionicons 
               name={isPremium ? "checkmark-circle" : "close-circle-outline"} 
               size={20} 
               color={isPremium ? "#4CAF50" : "#666666"} 
@@ -91,7 +70,7 @@ export default function SettingsScreen() {
             <>
               <View style={styles.planContainer}>
                 <View style={styles.planCard}>
-                  <Icon.Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.planIcon} />
+                  <Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.planIcon} />
                   <Text style={styles.planTitle}>Monthly</Text>
                   <Text style={styles.planPrice}>2€</Text>
                   <Text style={styles.planPeriod}>per month</Text>
@@ -107,7 +86,7 @@ export default function SettingsScreen() {
                   <View style={styles.bestValueTag}>
                     <Text style={styles.bestValueText}>SAVE 10%</Text>
                   </View>
-                  <Icon.Ionicons name="calendar" size={24} color="#4a4ae0" style={styles.planIcon} />
+                  <Ionicons name="calendar" size={24} color="#4a4ae0" style={styles.planIcon} />
                   <Text style={styles.planTitle}>Yearly</Text>
                   <Text style={styles.planPrice}>21.6€</Text>
                   <Text style={styles.planPeriod}>per year</Text>
@@ -127,10 +106,9 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        {/* Data Management Section */}
         <View style={styles.card}>
           <View style={styles.cardTitleContainer}>
-            <Icon.Ionicons name="settings-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+            <Ionicons name="settings-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
             <Text style={styles.cardTitle}>Data Management</Text>
           </View>
           
@@ -139,14 +117,13 @@ export default function SettingsScreen() {
             onPress={handleResetProgress}
           >
             <Text style={styles.settingLabel}>Reset Progress</Text>
-            <Icon.Ionicons name="chevron-forward" size={20} color="#666666" />
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
           </TouchableOpacity>
         </View>
 
-        {/* About Section */}
         <View style={styles.card}>
           <View style={styles.cardTitleContainer}>
-            <Icon.Ionicons name="information-circle-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
+            <Ionicons name="information-circle-outline" size={20} color="#333333" style={styles.cardTitleIcon} />
             <Text style={styles.cardTitle}>About</Text>
           </View>
           
@@ -157,12 +134,12 @@ export default function SettingsScreen() {
           
           <TouchableOpacity style={styles.settingRow}>
             <Text style={styles.settingLabel}>Privacy Policy</Text>
-            <Icon.Ionicons name="chevron-forward" size={20} color="#666666" />
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.settingRow}>
             <Text style={styles.settingLabel}>Terms of Service</Text>
-            <Icon.Ionicons name="chevron-forward" size={20} color="#666666" />
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
           </TouchableOpacity>
         </View>
       </ScrollView>
