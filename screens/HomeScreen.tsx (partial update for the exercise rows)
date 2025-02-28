@@ -1,0 +1,41 @@
+// Inside the HomeScreen component, update the exercise rows in the render method:
+
+{workout && workout.exercises.map((exercise) => (
+  <View key={exercise.id} style={styles.exerciseRow}>
+    <View style={styles.exerciseNameContainer}>
+      <Ionicons 
+        name={
+          exercise.name === 'Push-ups' ? 'fitness-outline' :
+          exercise.name === 'Squats' ? 'body-outline' :
+          exercise.name === 'Running' ? 'walk-outline' :
+          exercise.name === 'Sit-ups' ? 'bicycle-outline' : 'barbell-outline'
+        } 
+        size={20} 
+        color="#333333" 
+        style={styles.exerciseIcon} 
+      />
+      <Text style={styles.exerciseName}>{exercise.name}</Text>
+    </View>
+    <View style={styles.exerciseProgress}>
+      <View 
+        style={[
+          styles.progressIndicator, 
+          { width: `${Math.min((exercise.completed / exercise.target) * 100, 100)}%` }
+        ]} 
+      />
+    </View>
+    <Text style={styles.exerciseCount}>
+      {exercise.completed}/{exercise.target}
+    </Text>
+  </View>
+))}
+
+// Add this to the styles:
+exerciseNameContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  width: '30%',
+},
+exerciseIcon: {
+  marginRight: 4,
+},

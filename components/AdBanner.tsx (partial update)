@@ -1,0 +1,18 @@
+// Inside the AdBanner component:
+
+<View style={[styles.container, size === 'large' ? styles.largeBanner : styles.smallBanner]}>
+  <Ionicons name="megaphone-outline" size={16} color="#666666" style={styles.adIcon} />
+  <Text style={styles.adText}>
+    {size === 'large' 
+      ? 'This is a simulated full-width advertisement' 
+      : 'This is a simulated advertisement'}
+  </Text>
+  <TouchableOpacity style={styles.upgradeButton} onPress={purchaseMonthly}>
+    <Text style={styles.upgradeButtonText}>Remove Ads</Text>
+  </TouchableOpacity>
+</View>
+
+// Add to styles:
+adIcon: {
+  marginRight: 4,
+},

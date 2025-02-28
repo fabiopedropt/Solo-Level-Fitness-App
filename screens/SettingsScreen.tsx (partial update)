@@ -1,0 +1,57 @@
+// Inside the SettingsScreen component:
+
+<View style={styles.subscriptionStatus}>
+  <Ionicons 
+    name={isPremium ? "checkmark-circle" : "close-circle-outline"} 
+    size={20} 
+    color={isPremium ? "#4CAF50" : "#666666"} 
+    style={styles.statusIcon} 
+  />
+  <Text style={styles.statusLabel}>Status:</Text>
+  <Text style={[
+    styles.statusValue, 
+    { color: isPremium ? '#4CAF50' : '#666666' }
+  ]}>
+    {isPremium ? 'Premium' : 'Free'}
+  </Text>
+</View>
+
+// Update the plan cards:
+<View style={styles.planContainer}>
+  <View style={styles.planCard}>
+    <Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.planIcon} />
+    <Text style={styles.planTitle}>Monthly</Text>
+    <Text style={styles.planPrice}>2€</Text>
+    <Text style={styles.planPeriod}>per month</Text>
+    <TouchableOpacity 
+      style={styles.planButton}
+      onPress={purchaseMonthly}
+    >
+      <Text style={styles.buttonText}>Subscribe</Text>
+    </TouchableOpacity>
+  </View>
+  
+  <View style={styles.planCard}>
+    <View style={styles.bestValueTag}>
+      <Text style={styles.bestValueText}>SAVE 10%</Text>
+    </View>
+    <Ionicons name="calendar" size={24} color="#4a4ae0" style={styles.planIcon} />
+    <Text style={styles.planTitle}>Yearly</Text>
+    <Text style={styles.planPrice}>21.6€</Text>
+    <Text style={styles.planPeriod}>per year</Text>
+    <TouchableOpacity 
+      style={styles.planButton}
+      onPress={purchaseYearly}
+    >
+      <Text style={styles.buttonText}>Subscribe</Text>
+    </TouchableOpacity>
+  </View>
+</View>
+
+// Add to styles:
+statusIcon: {
+  marginRight: 4,
+},
+planIcon: {
+  marginBottom: 8,
+},

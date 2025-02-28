@@ -1,0 +1,48 @@
+// Inside the StatsScreen component:
+
+<View style={styles.statsGrid}>
+  <View style={styles.statCard}>
+    <Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
+    <Text style={styles.statValue}>
+      {progress?.totalWorkoutsCompleted || 0}
+    </Text>
+    <Text style={styles.statLabel}>
+      Total Workouts
+    </Text>
+  </View>
+  
+  <View style={styles.statCard}>
+    <Ionicons name="flame-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
+    <Text style={styles.statValue}>
+      {progress?.streakDays || 0}
+    </Text>
+    <Text style={styles.statLabel}>
+      Current Streak
+    </Text>
+  </View>
+  
+  <View style={styles.statCard}>
+    <Ionicons name="pie-chart-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
+    <Text style={styles.statValue}>
+      {calculateMonthlyCompletionRate()}
+    </Text>
+    <Text style={styles.statLabel}>
+      Completion Rate
+    </Text>
+  </View>
+  
+  <View style={styles.statCard}>
+    <Ionicons name="trending-up-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
+    <Text style={styles.statValue}>
+      {calculateStreakPercentage()}
+    </Text>
+    <Text style={styles.statLabel}>
+      Streak Goal
+    </Text>
+  </View>
+</View>
+
+// Add to styles:
+statIcon: {
+  marginBottom: 8,
+},

@@ -1,0 +1,11 @@
+// Inside the LevelUpModal component:
+
+<View style={styles.header}>
+  <Ionicons name="trophy" size={48} color="#FFD700" style={styles.trophyIcon} />
+  <Text style={styles.levelUpText}>LEVEL UP!</Text>
+</View>
+
+// Add to styles:
+trophyIcon: {
+  marginBottom: 10,
+},

@@ -1,0 +1,79 @@
+// Inside the AttributeStats component:
+
+<View style={styles.attributeRow}>
+  <View style={styles.attributeLabelContainer}>
+    <Ionicons name="barbell-outline" size={18} color="#e53935" style={styles.attributeIcon} />
+    <Text style={styles.attributeLabel}>Strength</Text>
+  </View>
+  <View style={styles.attributeBarContainer}>
+    <View 
+      style={[
+        styles.attributeBar, 
+        styles.strengthBar,
+        { width: getAttributeBarWidth(attributes.strength) }
+      ]} 
+    />
+  </View>
+  <Text style={styles.attributeValue}>{attributes.strength.toFixed(1)}</Text>
+</View>
+
+<View style={styles.attributeRow}>
+  <View style={styles.attributeLabelContainer}>
+    <Ionicons name="heart-outline" size={18} color="#43a047" style={styles.attributeIcon} />
+    <Text style={styles.attributeLabel}>Endurance</Text>
+  </View>
+  <View style={styles.attributeBarContainer}>
+    <View 
+      style={[
+        styles.attributeBar, 
+        styles.enduranceBar,
+        { width: getAttributeBarWidth(attributes.endurance) }
+      ]} 
+    />
+  </View>
+  <Text style={styles.attributeValue}>{attributes.endurance.toFixed(1)}</Text>
+</View>
+
+<View style={styles.attributeRow}>
+  <View style={styles.attributeLabelContainer}>
+    <Ionicons name="flash-outline" size={18} color="#1e88e5" style={styles.attributeIcon} />
+    <Text style={styles.attributeLabel}>Agility</Text>
+  </View>
+  <View style={styles.attributeBarContainer}>
+    <View 
+      style={[
+        styles.attributeBar, 
+        styles.agilityBar,
+        { width: getAttributeBarWidth(attributes.agility) }
+      ]} 
+    />
+  </View>
+  <Text style={styles.attributeValue}>{attributes.agility.toFixed(1)}</Text>
+</View>
+
+<View style={styles.attributeRow}>
+  <View style={styles.attributeLabelContainer}>
+    <Ionicons name="flame-outline" size={18} color="#8e24aa" style={styles.attributeIcon} />
+    <Text style={styles.attributeLabel}>Willpower</Text>
+  </View>
+  <View style={styles.attributeBarContainer}>
+    <View 
+      style={[
+        styles.attributeBar, 
+        styles.willpowerBar,
+        { width: getAttributeBarWidth(attributes.willpower) }
+      ]} 
+    />
+  </View>
+  <Text style={styles.attributeValue}>{attributes.willpower.toFixed(1)}</Text>
+</View>
+
+// Add to styles:
+attributeLabelContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  width: 80,
+},
+attributeIcon: {
+  marginRight: 4,
+},

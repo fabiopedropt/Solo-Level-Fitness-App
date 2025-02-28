@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Exercise } from '../utils/mockData';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -17,10 +18,29 @@ export default function ExerciseCard({
 }: ExerciseCardProps) {
   const progress = Math.min((exercise.completed / exercise.target) * 100, 100);
   
+  // Get the appropriate icon for each exercise
+  const getExerciseIcon = () => {
+    switch(exercise.name) {
+      case 'Push-ups':
+        return 'fitness-outline';
+      case 'Squats':
+        return 'body-outline';
+      case 'Running':
+        return 'walk-outline';
+      case 'Sit-ups':
+        return 'bicycle-outline';
+      default:
+        return 'barbell-outline';
+    }
+  };
+  
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>{exercise.name}</Text>
+        <View style={styles.titleContainer}>
+          <Ionicons name={getExerciseIcon()} size={24} color="#333333" style={styles.icon} />
+          <Text style={styles.title}>{exercise.name}</Text>
+        </View>
         <Text style={styles.progress}>
           {exercise.completed}/{exercise.target} {exercise.unit}
         </Text>
@@ -36,13 +56,14 @@ export default function ExerciseCard({
           onPress={onDecrement}
           disabled={exercise.completed <= 0}
         >
-          <Text style={styles.buttonText}>-</Text>
+          <Ionicons name="remove" size={20} color="#ffffff" />
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={styles.instructionsButton}
           onPress={onViewInstructions}
         >
+          <Ionicons name="information-circle-outline" size={16} color="#555555" style={styles.instructionIcon} />
           <Text style={styles.instructionsText}>Instructions</Text>
         </TouchableOpacity>
         
@@ -50,7 +71,7 @@ export default function ExerciseCard({
           style={[styles.button, styles.incrementButton]}
           onPress={onIncrement}
         >
-          <Text style={styles.buttonText}>+</Text>
+          <Ionicons name="add" size={20} color="#ffffff" />
         </TouchableOpacity>
       </View>
     </View>
@@ -74,6 +95,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  icon: {
+    marginRight: 8,
   },
   title: {
     fontSize: 18,
@@ -120,10 +148,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   instructionsButton: {
+    flexDirection: 'row',
     paddingVertical: 8,
     paddingHorizontal: 16,
     backgroundColor: '#f0f0f0',
     borderRadius: 20,
+    alignItems: 'center',
+  },
+  instructionIcon: {
+    marginRight: 4,
   },
   instructionsText: {
     color: '#555555',
