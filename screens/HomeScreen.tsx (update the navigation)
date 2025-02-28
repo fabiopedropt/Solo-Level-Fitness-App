@@ -1,0 +1,5 @@
+// Replace this line:
+onPress={() => navigation.navigate('Workout')}
+
+// With this:
+onPress={() => navigation.navigate('Workout')}
