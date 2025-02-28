@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Exercise } from '../utils/mockData';
-import * as Icon from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -44,7 +44,7 @@ export default function ExerciseCard({
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Icon.Ionicons name={getExerciseIcon()} size={24} color="#333333" style={styles.icon} />
+          <Ionicons name={getExerciseIcon()} size={24} color="#333333" style={styles.icon} />
           <Text style={styles.title}>{exercise.name}</Text>
         </View>
         <Text style={styles.progress}>
@@ -63,14 +63,14 @@ export default function ExerciseCard({
             onPress={() => onDecrement(1)}
             disabled={exercise.completed <= 0}
           >
-            <Icon.Ionicons name="remove" size={20} color="#ffffff" />
+            <Ionicons name="remove" size={20} color="#ffffff" />
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.instructionsButton}
             onPress={onViewInstructions}
           >
-            <Icon.Ionicons name="information-circle-outline" size={16} color="#555555" style={styles.instructionIcon} />
+            <Ionicons name="information-circle-outline" size={16} color="#555555" style={styles.instructionIcon} />
             <Text style={styles.instructionsText}>Instructions</Text>
           </TouchableOpacity>
           
@@ -78,7 +78,7 @@ export default function ExerciseCard({
             style={[styles.button, styles.incrementButton]}
             onPress={() => onIncrement(1)}
           >
-            <Icon.Ionicons name="add" size={20} color="#ffffff" />
+            <Ionicons name="add" size={20} color="#ffffff" />
           </TouchableOpacity>
         </View>
         
