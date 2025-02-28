@@ -1,0 +1,4 @@
+import IconTest from '../components/IconTest';
+
+// Add this inside the ScrollView, at the top:
+<IconTest />

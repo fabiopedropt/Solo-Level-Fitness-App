@@ -21,26 +21,16 @@ function TabNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          
-          switch (route.name) {
-            case 'Home':
-              iconName = focused ? 'home' : 'home-outline';
-              break;
-            case 'Stats':
-              iconName = focused ? 'stats-chart' : 'stats-chart-outline';
-              break;
-            case 'Profile':
-              iconName = focused ? 'person' : 'person-outline';
-              break;
-            case 'Settings':
-              iconName = focused ? 'settings' : 'settings-outline';
-              break;
-            default:
-              iconName = 'help-outline';
+          if (route.name === 'Home') {
+            return <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />;
+          } else if (route.name === 'Stats') {
+            return <Ionicons name={focused ? 'stats-chart' : 'stats-chart-outline'} size={size} color={color} />;
+          } else if (route.name === 'Profile') {
+            return <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />;
+          } else if (route.name === 'Settings') {
+            return <Ionicons name={focused ? 'settings' : 'settings-outline'} size={size} color={color} />;
           }
-          
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Ionicons name="help-outline" size={size} color={color} />;
         },
         tabBarActiveTintColor: '#4a4ae0',
         tabBarInactiveTintColor: 'gray',
