@@ -1,0 +1,9 @@
+{workout && workout.exercises.map((exercise) => (
+  <ExerciseCard
+    key={exercise.id}
+    exercise={exercise}
+    onIncrement={(amount) => handleIncrement(exercise.id, amount)}
+    onDecrement={(amount) => handleDecrement(exercise.id, amount)}
+    onViewInstructions={() => showInstructions(exercise)}
+  />
+))}

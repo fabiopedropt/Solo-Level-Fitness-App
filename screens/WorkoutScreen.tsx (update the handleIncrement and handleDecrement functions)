@@ -1,0 +1,63 @@
+const handleIncrement = async (exerciseId: string, amount: number = 1) => {
+  if (!workout) return;
+  
+  const updatedExercises = workout.exercises.map(exercise => {
+    if (exercise.id === exerciseId) {
+      // For running, we increment by 0.5 km per unit
+      const incrementAmount = exercise.name === 'Running' ? amount * 0.5 : amount;
+      return {
+        ...exercise,
+        completed: exercise.completed + incrementAmount
+      };
+    }
+    return exercise;
+  });
+  
+  const updatedWorkout = {
+    ...workout,
+    exercises: updatedExercises,
+  };
+  
+  setWorkout(updatedWorkout);
+  await saveDailyWorkout(updatedWorkout);
+  
+  // Check if all exercises are completed
+  if (progress) {
+    const result = await updateWorkoutCompletion(updatedWorkout, progress);
+    
+    // Update progress with the latest data
+    setProgress(result.updatedProgress);
+    
+    // Check if workout was just completed
+    const allCompleted = updatedExercises.every(ex => ex.completed >= ex.target);
+    if (allCompleted && !workout.completed) {
+      // Show attribute gains
+      setAttributeGains(result.attributeGains);
+      setShowAttributeGains(true);
+    }
+  }
+};
+
+const handleDecrement = async (exerciseId: string, amount: number = 1) => {
+  if (!workout) return;
+  
+  const updatedExercises = workout.exercises.map(exercise => {
+    if (exercise.id === exerciseId) {
+      // For running, we decrement by 0.5 km per unit
+      const decrementAmount = exercise.name === 'Running' ? amount * 0.5 : amount;
+      return {
+        ...exercise,
+        completed: Math.max(0, exercise.completed - decrementAmount)
+      };
+    }
+    return exercise;
+  });
+  
+  const updatedWorkout = {
+    ...workout,
+    exercises: updatedExercises,
+  };
+  
+  setWorkout(updatedWorkout);
+  await saveDailyWorkout(updatedWorkout);
+};
