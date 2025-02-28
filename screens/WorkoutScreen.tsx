@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Modal, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DailyWorkout, Exercise, UserProgress } from '../utils/mockData';
+import { DailyWorkout, Exercise, UserProgress, getRandomQuote } from '../utils/mockData';
 import { getDailyWorkout, getUserProgress, saveDailyWorkout, updateWorkoutCompletion } from '../utils/storage';
 import ExerciseCard from '../components/ExerciseCard';
 import { useNavigation } from '@react-navigation/native';
@@ -17,6 +17,8 @@ export default function WorkoutScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [instructionsVisible, setInstructionsVisible] = useState(false);
+  const [attributeGains, setAttributeGains] = useState<Partial<Record<string, number>>>({});
+  const [showAttributeGains, setShowAttributeGains] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -61,20 +63,17 @@ export default function WorkoutScreen() {
     
     // Check if all exercises are completed
     if (progress) {
-      await updateWorkoutCompletion(updatedWorkout, progress);
+      const result = await updateWorkoutCompletion(updatedWorkout, progress);
       
-      // Reload progress to get updated streak
-      const updatedProgress = await getUserProgress();
-      setProgress(updatedProgress);
+      // Update progress with the latest data
+      setProgress(result.updatedProgress);
       
       // Check if workout was just completed
       const allCompleted = updatedExercises.every(ex => ex.completed >= ex.target);
       if (allCompleted && !workout.completed) {
-        Alert.alert(
-          "Workout Completed!",
-          "Congratulations! You've completed today's Solo Leveling training.",
-          [{ text: "OK", onPress: () => navigation.navigate('Home') }]
-        );
+        // Show attribute gains
+        setAttributeGains(result.attributeGains);
+        setShowAttributeGains(true);
       }
     }
   };
@@ -107,6 +106,13 @@ export default function WorkoutScreen() {
     setInstructionsVisible(true);
   };
 
+  const handleAttributeGainsClose = () => {
+    setShowAttributeGains(false);
+    
+    // Navigate back to home after showing gains
+    navigation.navigate('Home');
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -136,6 +142,7 @@ export default function WorkoutScreen() {
         ))}
       </ScrollView>
 
+      {/* Exercise Instructions Modal */}
       <Modal
         visible={instructionsVisible}
         transparent={true}
@@ -151,6 +158,41 @@ export default function WorkoutScreen() {
               onPress={() => setInstructionsVisible(false)}
             >
               <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Attribute Gains Modal */}
+      <Modal
+        visible={showAttributeGains}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleAttributeGainsClose}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.attributeModalContent}>
+            <Text style={styles.attributeModalTitle}>Attributes Increased!</Text>
+            
+            <View style={styles.attributesList}>
+              {Object.entries(attributeGains).map(([key, value]) => (
+                <View key={key} style={styles.attributeItem}>
+                  <Text style={styles.attributeName}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+                  <Text style={styles.attributeValue}>+{value.toFixed(1)}</Text>
+                </View>
+              ))}
+            </View>
+            
+            <View style={styles.quoteContainer}>
+              <Text style={styles.quoteText}>"{getRandomQuote()}"</Text>
+              <Text style={styles.quoteAuthor}>- Sung Jin-Woo</Text>
+            </View>
+            
+            <TouchableOpacity
+              style={styles.attributeModalButton}
+              onPress={handleAttributeGainsClose}
+            >
+              <Text style={styles.modalButtonText}>Continue</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -220,5 +262,65 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  attributeModalContent: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#4a4ae0',
+  },
+  attributeModalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 20,
+  },
+  attributesList: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  attributeItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  attributeName: {
+    fontSize: 16,
+    color: '#e0e0e0',
+  },
+  attributeValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4CAF50',
+  },
+  quoteContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 20,
+    width: '100%',
+  },
+  quoteText: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: '#ffffff',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  quoteAuthor: {
+    fontSize: 12,
+    color: '#cccccc',
+    textAlign: 'right',
+  },
+  attributeModalButton: {
+    backgroundColor: '#4a4ae0',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
   },
 });

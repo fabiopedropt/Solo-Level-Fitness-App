@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { UserProgress } from '../utils/mockData';
 import { getUserProgress, saveUserProgress } from '../utils/storage';
 import { useNavigation } from '@react-navigation/native';
+import MonthlyAnalyticsChart from '../components/MonthlyAnalyticsChart';
+import AttributeStats from '../components/AttributeStats';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -28,14 +30,40 @@ export default function ProfileScreen() {
   const resetProgress = async () => {
     if (!progress) return;
     
-    const resetData: UserProgress = {
-      streakDays: 0,
-      totalWorkoutsCompleted: 0,
-      lastCompletedDate: null,
-    };
-    
-    await saveUserProgress(resetData);
-    setProgress(resetData);
+    Alert.alert(
+      "Reset Progress",
+      "Are you sure you want to reset all your progress? This cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            const resetData: UserProgress = {
+              streakDays: 0,
+              totalWorkoutsCompleted: 0,
+              lastCompletedDate: null,
+              level: 1,
+              experience: 0,
+              experienceToNextLevel: 100,
+              monthlyWorkouts: {},
+              attributes: {
+                strength: 1,
+                endurance: 1,
+                agility: 1,
+                willpower: 1,
+              }
+            };
+            
+            await saveUserProgress(resetData);
+            setProgress(resetData);
+          }
+        }
+      ]
+    );
   };
 
   if (loading) {
@@ -56,7 +84,23 @@ export default function ProfileScreen() {
       </View>
 
       {progress && (
-        <View style={styles.content}>
+        <ScrollView style={styles.content}>
+          <View style={styles.levelCard}>
+            <Text style={styles.levelLabel}>HUNTER LEVEL</Text>
+            <Text style={styles.levelValue}>{progress.level}</Text>
+            <View style={styles.expBarContainer}>
+              <View 
+                style={[
+                  styles.expBar, 
+                  { width: `${(progress.experience / progress.experienceToNextLevel) * 100}%` }
+                ]} 
+              />
+            </View>
+            <Text style={styles.expText}>
+              {progress.experience} / {progress.experienceToNextLevel} XP
+            </Text>
+          </View>
+          
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{progress.streakDays}</Text>
@@ -68,6 +112,10 @@ export default function ProfileScreen() {
               <Text style={styles.statLabel}>Total Workouts</Text>
             </View>
           </View>
+          
+          <AttributeStats attributes={progress.attributes} />
+          
+          <MonthlyAnalyticsChart monthlyWorkouts={progress.monthlyWorkouts} />
           
           <View style={styles.infoCard}>
             <Text style={styles.infoTitle}>Last Completed Workout</Text>
@@ -95,7 +143,7 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.resetButton} onPress={resetProgress}>
             <Text style={styles.resetButtonText}>Reset Progress</Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -126,6 +174,45 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+  },
+  levelCard: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  levelLabel: {
+    fontSize: 14,
+    color: '#aaa',
+    marginBottom: 4,
+  },
+  levelValue: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 12,
+  },
+  expBarContainer: {
+    height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 4,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  expBar: {
+    height: '100%',
+    backgroundColor: '#4a4ae0',
+    borderRadius: 4,
+  },
+  expText: {
+    fontSize: 12,
+    color: '#aaa',
+    textAlign: 'right',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -196,7 +283,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 8,
+    marginBottom: 24,
   },
   resetButtonText: {
     color: '#fff',
