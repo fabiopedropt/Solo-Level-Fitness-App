@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DailyWorkout, UserProgress, getTodayDateString, getRandomQuote } from '../utils/mockData';
 import { getDailyWorkout, getUserProgress, getLevelUpNotification, saveLevelUpNotification } from '../utils/storage';
@@ -7,22 +7,34 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import LevelUpModal from '../components/LevelUpModal';
+import { useTheme } from '../utils/ThemeContext';
+import { useSubscription } from '../utils/SubscriptionContext';
+import AdBanner from '../components/AdBanner';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const { theme } = useTheme();
+  const { isPremium, purchaseMonthly, purchaseYearly } = useSubscription();
   const [workout, setWorkout] = useState<DailyWorkout | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [quote, setQuote] = useState<string>('');
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpLevel, setLevelUpLevel] = useState(1);
+  const [showPremiumPromo, setShowPremiumPromo] = useState(false);
 
   useEffect(() => {
     loadData();
     setQuote(getRandomQuote());
-  }, []);
+    
+    // Show premium promo randomly for free users
+    if (!isPremium && Math.random() > 0.7) {
+      setShowPremiumPromo(true);
+    }
+  }, [isPremium]);
 
   const loadData = async () => {
     try {
@@ -69,79 +81,140 @@ export default function HomeScreen() {
     return Math.round((progress.experience / progress.experienceToNextLevel) * 100);
   };
 
+  // For debugging - add this function to reset all data
+  const resetAllData = async () => {
+    Alert.alert(
+      "Reset All Data",
+      "This will reset all app data. This is for debugging purposes only. Continue?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await AsyncStorage.clear();
+              Alert.alert("Success", "All data has been reset. Please restart the app.");
+            } catch (error) {
+              console.error('Error clearing data:', error);
+              Alert.alert("Error", "Failed to reset data.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text>Loading...</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <Text style={{ color: theme.text }}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>Solo Leveling Training</Text>
-          <Text style={styles.date}>{getTodayDateString()}</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Solo Leveling Training</Text>
+          <Text style={[styles.date, { color: theme.textSecondary }]}>{getTodayDateString()}</Text>
         </View>
 
         {progress && (
-          <View style={styles.levelContainer}>
+          <View style={[styles.levelContainer, { backgroundColor: theme.levelCard }]}>
             <View style={styles.levelHeader}>
-              <Text style={styles.levelLabel}>LEVEL</Text>
-              <Text style={styles.levelValue}>{progress.level}</Text>
+              <Text style={[styles.levelLabel, { color: theme.levelCardText }]}>LEVEL</Text>
+              <Text style={[styles.levelValue, { color: theme.primary }]}>{progress.level}</Text>
             </View>
-            <View style={styles.expBarContainer}>
+            <View style={[styles.expBarContainer, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}>
               <View 
                 style={[
                   styles.expBar, 
-                  { width: `${calculateExperiencePercentage()}%` }
+                  { width: `${calculateExperiencePercentage()}%`, backgroundColor: theme.primary }
                 ]} 
               />
             </View>
-            <Text style={styles.expText}>
+            <Text style={[styles.expText, { color: theme.levelCardText }]}>
               {progress.experience} / {progress.experienceToNextLevel} XP
             </Text>
           </View>
         )}
 
-        <View style={styles.quoteContainer}>
-          <Text style={styles.quoteText}>"{quote}"</Text>
-          <Text style={styles.quoteAuthor}>- Sung Jin-Woo</Text>
+        <View style={[styles.quoteContainer, { backgroundColor: theme.quoteBackground }]}>
+          <Text style={[styles.quoteText, { color: theme.quoteText }]}>"{quote}"</Text>
+          <Text style={[styles.quoteAuthor, { color: theme.quoteAuthor }]}>- Sung Jin-Woo</Text>
         </View>
+
+        {!isPremium && <AdBanner />}
+
+        {showPremiumPromo && !isPremium && (
+          <View style={[styles.premiumPromo, { backgroundColor: theme.primary }]}>
+            <Text style={styles.promoTitle}>Upgrade to Premium</Text>
+            <Text style={styles.promoText}>
+              Remove ads and unlock exclusive features!
+            </Text>
+            <View style={styles.promoButtons}>
+              <TouchableOpacity 
+                style={[styles.promoButton, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}
+                onPress={purchaseMonthly}
+              >
+                <Text style={styles.promoButtonText}>Monthly</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.promoButton, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}
+                onPress={purchaseYearly}
+              >
+                <Text style={styles.promoButtonText}>Yearly (Save 10%)</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity 
+              style={styles.dismissButton}
+              onPress={() => setShowPremiumPromo(false)}
+            >
+              <Text style={styles.dismissText}>Dismiss</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {progress && (
           <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{progress.streakDays}</Text>
-              <Text style={styles.statLabel}>Day Streak</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.card }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{progress.streakDays}</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Day Streak</Text>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{progress.totalWorkoutsCompleted}</Text>
-              <Text style={styles.statLabel}>Workouts</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.card }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{progress.totalWorkoutsCompleted}</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Workouts</Text>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{calculateOverallProgress()}%</Text>
-              <Text style={styles.statLabel}>Today</Text>
+            <View style={[styles.statCard, { backgroundColor: theme.card }]}>
+              <Text style={[styles.statValue, { color: theme.text }]}>{calculateOverallProgress()}%</Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Today</Text>
             </View>
           </View>
         )}
 
-        <View style={styles.workoutCard}>
-          <Text style={styles.workoutTitle}>Today's Training</Text>
+        <View style={[styles.workoutCard, { backgroundColor: theme.card }]}>
+          <Text style={[styles.workoutTitle, { color: theme.text }]}>Today's Training</Text>
           
           {workout && workout.exercises.map((exercise) => (
             <View key={exercise.id} style={styles.exerciseRow}>
-              <Text style={styles.exerciseName}>{exercise.name}</Text>
-              <View style={styles.exerciseProgress}>
+              <Text style={[styles.exerciseName, { color: theme.text }]}>{exercise.name}</Text>
+              <View style={[styles.exerciseProgress, { backgroundColor: theme.background }]}>
                 <View 
                   style={[
                     styles.progressIndicator, 
-                    { width: `${Math.min((exercise.completed / exercise.target) * 100, 100)}%` }
+                    { 
+                      width: `${Math.min((exercise.completed / exercise.target) * 100, 100)}%`,
+                      backgroundColor: theme.secondary 
+                    }
                   ]} 
                 />
               </View>
-              <Text style={styles.exerciseCount}>
+              <Text style={[styles.exerciseCount, { color: theme.textSecondary }]}>
                 {exercise.completed}/{exercise.target}
               </Text>
             </View>
@@ -150,7 +223,7 @@ export default function HomeScreen() {
           <TouchableOpacity 
             style={[
               styles.startButton,
-              workout?.completed ? styles.completedButton : null
+              workout?.completed ? [styles.completedButton, { backgroundColor: theme.textSecondary }] : { backgroundColor: theme.secondary },
             ]}
             onPress={() => navigation.navigate('Workout')}
             disabled={workout?.completed}
@@ -161,12 +234,14 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity 
-          style={styles.profileButton}
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <Text style={styles.profileButtonText}>View Profile</Text>
-        </TouchableOpacity>
+        {__DEV__ && (
+          <TouchableOpacity 
+            style={styles.debugButton}
+            onPress={resetAllData}
+          >
+            <Text style={styles.debugButtonText}>Reset All Data (Debug)</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
       
       <LevelUpModal 
@@ -181,7 +256,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
     padding: 16,
@@ -192,15 +266,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
   },
   date: {
     fontSize: 16,
-    color: '#666',
     marginTop: 4,
   },
   levelContainer: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -217,33 +288,27 @@ const styles = StyleSheet.create({
   },
   levelLabel: {
     fontSize: 16,
-    color: '#666',
     marginRight: 8,
   },
   levelValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#4a4ae0',
   },
   expBarContainer: {
     height: 8,
-    backgroundColor: '#f0f0f0',
     borderRadius: 4,
     marginBottom: 8,
     overflow: 'hidden',
   },
   expBar: {
     height: '100%',
-    backgroundColor: '#4a4ae0',
     borderRadius: 4,
   },
   expText: {
     fontSize: 12,
-    color: '#666',
     textAlign: 'right',
   },
   quoteContainer: {
-    backgroundColor: '#1a1a2e',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -256,14 +321,59 @@ const styles = StyleSheet.create({
   quoteText: {
     fontSize: 16,
     fontStyle: 'italic',
-    color: '#fff',
     marginBottom: 8,
     textAlign: 'center',
   },
   quoteAuthor: {
     fontSize: 14,
-    color: '#aaa',
     textAlign: 'right',
+  },
+  premiumPromo: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  promoTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  promoText: {
+    fontSize: 14,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  promoButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  promoButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    flex: 1,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  promoButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  dismissButton: {
+    alignItems: 'center',
+  },
+  dismissText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 12,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -271,7 +381,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   statCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     flex: 1,
@@ -286,15 +395,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   workoutCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -307,7 +413,6 @@ const styles = StyleSheet.create({
   workoutTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 16,
   },
   exerciseRow: {
@@ -317,52 +422,48 @@ const styles = StyleSheet.create({
   },
   exerciseName: {
     fontSize: 16,
-    color: '#333',
     width: '30%',
   },
   exerciseProgress: {
     flex: 1,
     height: 8,
-    backgroundColor: '#f0f0f0',
     borderRadius: 4,
     marginHorizontal: 12,
     overflow: 'hidden',
   },
   progressIndicator: {
     height: '100%',
-    backgroundColor: '#4CAF50',
     borderRadius: 4,
   },
   exerciseCount: {
     fontSize: 14,
-    color: '#666',
     width: '20%',
     textAlign: 'right',
   },
   startButton: {
-    backgroundColor: '#4CAF50',
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
     marginTop: 16,
   },
   completedButton: {
-    backgroundColor: '#9E9E9E',
   },
   startButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  profileButton: {
-    backgroundColor: '#2196F3',
+  debugButton: {
+    backgroundColor: '#333',
     borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignSelf: 'center',
+    marginTop: 20,
+    marginBottom: 20,
   },
-  profileButtonText: {
+  debugButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 12,
   },
 });

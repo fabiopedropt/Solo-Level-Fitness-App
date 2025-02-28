@@ -7,11 +7,16 @@ import ExerciseCard from '../components/ExerciseCard';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import { useTheme } from '../utils/ThemeContext';
+import { useSubscription } from '../utils/SubscriptionContext';
+import AdBanner from '../components/AdBanner';
 
 type WorkoutScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Workout'>;
 
 export default function WorkoutScreen() {
   const navigation = useNavigation<WorkoutScreenNavigationProp>();
+  const { theme } = useTheme();
+  const { isPremium } = useSubscription();
   const [workout, setWorkout] = useState<DailyWorkout | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -115,22 +120,24 @@ export default function WorkoutScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text>Loading...</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <Text style={{ color: theme.text }}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Today's Training</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { borderBottomColor: theme.border, backgroundColor: theme.card }]}>
+        <Text style={[styles.title, { color: theme.text }]}>Today's Training</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.closeButton}>Close</Text>
+          <Text style={[styles.closeButton, { color: theme.accent }]}>Close</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {!isPremium && <AdBanner />}
+        
         {workout && workout.exercises.map((exercise) => (
           <ExerciseCard
             key={exercise.id}
@@ -138,8 +145,11 @@ export default function WorkoutScreen() {
             onIncrement={() => handleIncrement(exercise.id)}
             onDecrement={() => handleDecrement(exercise.id)}
             onViewInstructions={() => showInstructions(exercise)}
+            theme={theme}
           />
         ))}
+        
+        {!isPremium && <AdBanner />}
       </ScrollView>
 
       {/* Exercise Instructions Modal */}
@@ -150,11 +160,15 @@ export default function WorkoutScreen() {
         onRequestClose={() => setInstructionsVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{selectedExercise?.name} Instructions</Text>
-            <Text style={styles.modalText}>{selectedExercise?.instructions}</Text>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              {selectedExercise?.name} Instructions
+            </Text>
+            <Text style={[styles.modalText, { color: theme.textSecondary }]}>
+              {selectedExercise?.instructions}
+            </Text>
             <TouchableOpacity
-              style={styles.modalButton}
+              style={[styles.modalButton, { backgroundColor: theme.accent }]}
               onPress={() => setInstructionsVisible(false)}
             >
               <Text style={styles.modalButtonText}>Close</Text>
@@ -171,25 +185,25 @@ export default function WorkoutScreen() {
         onRequestClose={handleAttributeGainsClose}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.attributeModalContent}>
+          <View style={[styles.attributeModalContent, { backgroundColor: theme.levelCard, borderColor: theme.primary }]}>
             <Text style={styles.attributeModalTitle}>Attributes Increased!</Text>
             
             <View style={styles.attributesList}>
               {Object.entries(attributeGains).map(([key, value]) => (
-                <View key={key} style={styles.attributeItem}>
+                <View key={key} style={[styles.attributeItem, { borderBottomColor: 'rgba(255, 255, 255, 0.1)' }]}>
                   <Text style={styles.attributeName}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
                   <Text style={styles.attributeValue}>+{value.toFixed(1)}</Text>
                 </View>
               ))}
             </View>
             
-            <View style={styles.quoteContainer}>
+            <View style={[styles.quoteContainer, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}>
               <Text style={styles.quoteText}>"{getRandomQuote()}"</Text>
               <Text style={styles.quoteAuthor}>- Sung Jin-Woo</Text>
             </View>
             
             <TouchableOpacity
-              style={styles.attributeModalButton}
+              style={[styles.attributeModalButton, { backgroundColor: theme.primary }]}
               onPress={handleAttributeGainsClose}
             >
               <Text style={styles.modalButtonText}>Continue</Text>
@@ -204,7 +218,6 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -212,20 +225,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#fff',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
   closeButton: {
     fontSize: 16,
-    color: '#2196F3',
   },
   scrollContent: {
     padding: 16,
+    paddingBottom: 32,
   },
   modalContainer: {
     flex: 1,
@@ -234,7 +244,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 24,
     width: '80%',
@@ -244,16 +253,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#333',
   },
   modalText: {
     fontSize: 16,
-    color: '#555',
     textAlign: 'center',
     marginBottom: 24,
   },
   modalButton: {
-    backgroundColor: '#2196F3',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -264,13 +270,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   attributeModalContent: {
-    backgroundColor: '#1a1a2e',
     borderRadius: 16,
     padding: 24,
     width: '85%',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#4a4ae0',
   },
   attributeModalTitle: {
     fontSize: 24,
@@ -287,7 +291,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   attributeName: {
     fontSize: 16,
@@ -299,7 +302,6 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
   },
   quoteContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 8,
     padding: 16,
     marginBottom: 20,
@@ -318,7 +320,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   attributeModalButton: {
-    backgroundColor: '#4a4ae0',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 8,

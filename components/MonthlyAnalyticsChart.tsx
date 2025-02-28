@@ -1,12 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { getAnalyticsMonths } from '../utils/mockData';
+import { useTheme } from '../utils/ThemeContext';
 
 interface MonthlyAnalyticsChartProps {
   monthlyWorkouts: Record<string, number>;
 }
 
 export default function MonthlyAnalyticsChart({ monthlyWorkouts }: MonthlyAnalyticsChartProps) {
+  const { theme } = useTheme();
   const months = getAnalyticsMonths();
   const maxWorkouts = Math.max(
     ...months.map(month => monthlyWorkouts[month] || 0),
@@ -21,19 +23,26 @@ export default function MonthlyAnalyticsChart({ monthlyWorkouts }: MonthlyAnalyt
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Monthly Workouts</Text>
+    <View style={[styles.container, { backgroundColor: theme.card }]}>
+      <Text style={[styles.title, { color: theme.text }]}>Monthly Workouts</Text>
       
       <View style={styles.chartContainer}>
-        {months.map((month, index) => {
+        {months.map((month) => {
           const workoutCount = monthlyWorkouts[month] || 0;
           const barHeight = (workoutCount / maxWorkouts) * 150; // Max height of 150
           
           return (
             <View key={month} style={styles.barContainer}>
-              <Text style={styles.barValue}>{workoutCount}</Text>
-              <View style={[styles.bar, { height: Math.max(barHeight, 5) }]} />
-              <Text style={styles.barLabel}>{formatMonth(month)}</Text>
+              <Text style={[styles.barValue, { color: theme.textSecondary }]}>{workoutCount}</Text>
+              <View 
+                style={[
+                  styles.bar, 
+                  { height: Math.max(barHeight, 5), backgroundColor: theme.primary }
+                ]} 
+              />
+              <Text style={[styles.barLabel, { color: theme.textSecondary }]}>
+                {formatMonth(month)}
+              </Text>
             </View>
           );
         })}
@@ -44,7 +53,6 @@ export default function MonthlyAnalyticsChart({ monthlyWorkouts }: MonthlyAnalyt
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -57,7 +65,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 16,
   },
   chartContainer: {
@@ -72,18 +79,15 @@ const styles = StyleSheet.create({
   },
   bar: {
     width: 20,
-    backgroundColor: '#4a4ae0',
     borderTopLeftRadius: 4,
     borderTopRightRadius: 4,
   },
   barValue: {
     fontSize: 12,
-    color: '#666',
     marginBottom: 4,
   },
   barLabel: {
     fontSize: 12,
-    color: '#666',
     marginTop: 8,
   },
 });

@@ -1,38 +1,46 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Exercise } from '../utils/mockData';
+import { Theme } from '../utils/ThemeContext';
 
 interface ExerciseCardProps {
   exercise: Exercise;
   onIncrement: () => void;
   onDecrement: () => void;
   onViewInstructions: () => void;
+  theme: Theme;
 }
 
 export default function ExerciseCard({ 
   exercise, 
   onIncrement, 
   onDecrement, 
-  onViewInstructions 
+  onViewInstructions,
+  theme
 }: ExerciseCardProps) {
   const progress = Math.min((exercise.completed / exercise.target) * 100, 100);
   
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: theme.card }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>{exercise.name}</Text>
-        <Text style={styles.progress}>
+        <Text style={[styles.title, { color: theme.text }]}>{exercise.name}</Text>
+        <Text style={[styles.progress, { color: theme.textSecondary }]}>
           {exercise.completed}/{exercise.target} {exercise.unit}
         </Text>
       </View>
       
-      <View style={styles.progressBarContainer}>
-        <View style={[styles.progressBar, { width: `${progress}%` }]} />
+      <View style={[styles.progressBarContainer, { backgroundColor: theme.background }]}>
+        <View 
+          style={[
+            styles.progressBar, 
+            { width: `${progress}%`, backgroundColor: theme.secondary }
+          ]} 
+        />
       </View>
       
       <View style={styles.controls}>
         <TouchableOpacity 
-          style={[styles.button, styles.decrementButton]}
+          style={[styles.button, styles.decrementButton, { backgroundColor: theme.error }]}
           onPress={onDecrement}
           disabled={exercise.completed <= 0}
         >
@@ -40,14 +48,14 @@ export default function ExerciseCard({
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={styles.instructionsButton}
+          style={[styles.instructionsButton, { backgroundColor: theme.background }]}
           onPress={onViewInstructions}
         >
-          <Text style={styles.instructionsText}>Instructions</Text>
+          <Text style={[styles.instructionsText, { color: theme.textSecondary }]}>Instructions</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={[styles.button, styles.incrementButton]}
+          style={[styles.button, styles.incrementButton, { backgroundColor: theme.secondary }]}
           onPress={onIncrement}
         >
           <Text style={styles.buttonText}>+</Text>
@@ -59,7 +67,6 @@ export default function ExerciseCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginVertical: 8,
@@ -78,22 +85,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
   },
   progress: {
     fontSize: 16,
-    color: '#555',
   },
   progressBarContainer: {
     height: 8,
-    backgroundColor: '#f0f0f0',
     borderRadius: 4,
     marginBottom: 16,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#4CAF50',
     borderRadius: 4,
   },
   controls: {
@@ -109,10 +112,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   decrementButton: {
-    backgroundColor: '#f44336',
   },
   incrementButton: {
-    backgroundColor: '#4CAF50',
   },
   buttonText: {
     color: 'white',
@@ -122,11 +123,9 @@ const styles = StyleSheet.create({
   instructionsButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: '#f0f0f0',
     borderRadius: 20,
   },
   instructionsText: {
-    color: '#555',
     fontSize: 14,
   },
 });

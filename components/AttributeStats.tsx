@@ -1,12 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { UserAttributes } from '../utils/mockData';
+import { useTheme } from '../utils/ThemeContext';
 
 interface AttributeStatsProps {
   attributes: UserAttributes;
 }
 
 export default function AttributeStats({ attributes }: AttributeStatsProps) {
+  const { theme } = useTheme();
   const maxAttribute = Math.max(
     attributes.strength,
     attributes.endurance,
@@ -19,12 +21,12 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Hunter Attributes</Text>
+    <View style={[styles.container, { backgroundColor: theme.card }]}>
+      <Text style={[styles.title, { color: theme.text }]}>Hunter Attributes</Text>
       
       <View style={styles.attributeRow}>
-        <Text style={styles.attributeLabel}>Strength</Text>
-        <View style={styles.attributeBarContainer}>
+        <Text style={[styles.attributeLabel, { color: theme.textSecondary }]}>Strength</Text>
+        <View style={[styles.attributeBarContainer, { backgroundColor: theme.background }]}>
           <View 
             style={[
               styles.attributeBar, 
@@ -33,12 +35,14 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
             ]} 
           />
         </View>
-        <Text style={styles.attributeValue}>{attributes.strength.toFixed(1)}</Text>
+        <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
+          {attributes.strength.toFixed(1)}
+        </Text>
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={styles.attributeLabel}>Endurance</Text>
-        <View style={styles.attributeBarContainer}>
+        <Text style={[styles.attributeLabel, { color: theme.textSecondary }]}>Endurance</Text>
+        <View style={[styles.attributeBarContainer, { backgroundColor: theme.background }]}>
           <View 
             style={[
               styles.attributeBar, 
@@ -47,12 +51,14 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
             ]} 
           />
         </View>
-        <Text style={styles.attributeValue}>{attributes.endurance.toFixed(1)}</Text>
+        <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
+          {attributes.endurance.toFixed(1)}
+        </Text>
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={styles.attributeLabel}>Agility</Text>
-        <View style={styles.attributeBarContainer}>
+        <Text style={[styles.attributeLabel, { color: theme.textSecondary }]}>Agility</Text>
+        <View style={[styles.attributeBarContainer, { backgroundColor: theme.background }]}>
           <View 
             style={[
               styles.attributeBar, 
@@ -61,12 +67,14 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
             ]} 
           />
         </View>
-        <Text style={styles.attributeValue}>{attributes.agility.toFixed(1)}</Text>
+        <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
+          {attributes.agility.toFixed(1)}
+        </Text>
       </View>
       
       <View style={styles.attributeRow}>
-        <Text style={styles.attributeLabel}>Willpower</Text>
-        <View style={styles.attributeBarContainer}>
+        <Text style={[styles.attributeLabel, { color: theme.textSecondary }]}>Willpower</Text>
+        <View style={[styles.attributeBarContainer, { backgroundColor: theme.background }]}>
           <View 
             style={[
               styles.attributeBar, 
@@ -75,7 +83,9 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
             ]} 
           />
         </View>
-        <Text style={styles.attributeValue}>{attributes.willpower.toFixed(1)}</Text>
+        <Text style={[styles.attributeValue, { color: theme.textSecondary }]}>
+          {attributes.willpower.toFixed(1)}
+        </Text>
       </View>
     </View>
   );
@@ -83,7 +93,6 @@ export default function AttributeStats({ attributes }: AttributeStatsProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -96,7 +105,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 16,
   },
   attributeRow: {
@@ -107,12 +115,10 @@ const styles = StyleSheet.create({
   attributeLabel: {
     width: 80,
     fontSize: 14,
-    color: '#555',
   },
   attributeBarContainer: {
     flex: 1,
     height: 12,
-    backgroundColor: '#f0f0f0',
     borderRadius: 6,
     marginHorizontal: 8,
     overflow: 'hidden',
@@ -136,7 +142,6 @@ const styles = StyleSheet.create({
   attributeValue: {
     width: 40,
     fontSize: 14,
-    color: '#555',
     textAlign: 'right',
   },
 });
