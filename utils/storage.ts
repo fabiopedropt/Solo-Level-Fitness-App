@@ -9,61 +9,41 @@ import {
   checkLevelUp,
   getCurrentMonthString
 } from './mockData';
-import { 
-  saveUserProgressToDatabase, 
-  getUserProgressFromDatabase,
-  saveDailyWorkoutToDatabase,
-  getDailyWorkoutFromDatabase
-} from './database';
-import { supabase } from './supabase';
 
 // Storage keys
 const DAILY_WORKOUT_KEY = 'solo_leveling_daily_workout';
 const USER_PROGRESS_KEY = 'solo_leveling_user_progress';
 const LEVEL_UP_NOTIFICATION_KEY = 'solo_leveling_level_up_notification';
 
-// Save daily workout
+// Save daily workout to AsyncStorage
 export const saveDailyWorkout = async (workout: DailyWorkout): Promise<void> => {
   try {
-    // Save to AsyncStorage for offline access
     await AsyncStorage.setItem(DAILY_WORKOUT_KEY, JSON.stringify(workout));
-    
-    // If user is authenticated, also save to database
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await saveDailyWorkoutToDatabase(user.id, workout);
-    }
   } catch (error) {
     console.error('Error saving daily workout:', error);
   }
 };
 
-// Get daily workout
+// Get daily workout from AsyncStorage
 export const getDailyWorkout = async (): Promise<DailyWorkout> => {
   try {
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Try to get from database if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: dbWorkout } = await getDailyWorkoutFromDatabase(user.id, today);
-      if (dbWorkout) {
-        return dbWorkout;
-      }
-    }
-    
-    // Otherwise, try to get from AsyncStorage
     const workoutJson = await AsyncStorage.getItem(DAILY_WORKOUT_KEY);
     if (workoutJson) {
       const workout = JSON.parse(workoutJson);
       
       // Check if the workout is from today
+      const today = new Date().toISOString().split('T')[0];
       if (workout.date === today) {
         return workout;
       }
+      
+      // If not from today, create a new one
+      const newWorkout = createDailyWorkout();
+      await saveDailyWorkout(newWorkout);
+      return newWorkout;
     }
     
-    // If no workout exists or not from today, create a new one
+    // If no workout exists, create a new one
     const newWorkout = createDailyWorkout();
     await saveDailyWorkout(newWorkout);
     return newWorkout;
@@ -75,40 +55,22 @@ export const getDailyWorkout = async (): Promise<DailyWorkout> => {
   }
 };
 
-// Save user progress
+// Save user progress to AsyncStorage
 export const saveUserProgress = async (progress: UserProgress): Promise<void> => {
   try {
-    // Save to AsyncStorage for offline access
     await AsyncStorage.setItem(USER_PROGRESS_KEY, JSON.stringify(progress));
-    
-    // If user is authenticated, also save to database
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await saveUserProgressToDatabase(user.id, progress);
-    }
   } catch (error) {
     console.error('Error saving user progress:', error);
   }
 };
 
-// Get user progress
+// Get user progress from AsyncStorage
 export const getUserProgress = async (): Promise<UserProgress> => {
   try {
-    // Try to get from database if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: dbProgress } = await getUserProgressFromDatabase(user.id);
-      if (dbProgress) {
-        return dbProgress;
-      }
-    }
-    
-    // Otherwise, try to get from AsyncStorage
     const progressJson = await AsyncStorage.getItem(USER_PROGRESS_KEY);
     if (progressJson) {
       return JSON.parse(progressJson);
     }
-    
     // If no progress exists, use initial progress
     await saveUserProgress(initialUserProgress);
     return initialUserProgress;
@@ -175,10 +137,6 @@ export const updateWorkoutCompletion = async (
     progress.lastCompletedDate = today;
     
     // Update monthly workouts
-    if (!progress.monthlyWorkouts) {
-      progress.monthlyWorkouts = {};
-    }
-    
     if (!progress.monthlyWorkouts[currentMonth]) {
       progress.monthlyWorkouts[currentMonth] = 0;
     }
@@ -196,16 +154,6 @@ export const updateWorkoutCompletion = async (
     
     // Calculate attribute gains
     attributeGains = calculateAttributeGains(workout);
-    
-    // Ensure attributes exists
-    if (!progress.attributes) {
-      progress.attributes = {
-        strength: 1,
-        endurance: 1,
-        agility: 1,
-        willpower: 1,
-      };
-    }
     
     // Update attributes
     Object.keys(attributeGains).forEach(key => {
