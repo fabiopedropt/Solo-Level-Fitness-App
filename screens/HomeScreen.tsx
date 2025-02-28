@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import * as Icon from '@expo/vector-icons';
 import { useSubscription } from '../utils/SubscriptionContext';
 import AdBanner from '../components/AdBanner';
 import LevelUpModal from '../components/LevelUpModal';
@@ -114,7 +114,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
 
         <View style={styles.quoteCard}>
-          <Ionicons name="chatbubble-outline" size={20} color="#ffffff" style={styles.quoteIcon} />
+          <Icon.Ionicons name="chatbubble-outline" size={20} color="#ffffff" style={styles.quoteIcon} />
           <Text style={styles.quoteText}>"{quote}"</Text>
           <Text style={styles.quoteAuthor}>- Sung Jin-Woo</Text>
         </View>
@@ -124,17 +124,17 @@ export default function HomeScreen({ navigation }: any) {
         {progress && (
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
-              <Ionicons name="flame-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
+              <Icon.Ionicons name="flame-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>{progress.streakDays}</Text>
               <Text style={styles.statLabel}>Day Streak</Text>
             </View>
             <View style={styles.statCard}>
-              <Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
+              <Icon.Ionicons name="calendar-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>{progress.totalWorkoutsCompleted}</Text>
               <Text style={styles.statLabel}>Workouts</Text>
             </View>
             <View style={styles.statCard}>
-              <Ionicons name="pie-chart-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
+              <Icon.Ionicons name="pie-chart-outline" size={24} color="#4a4ae0" style={styles.statIcon} />
               <Text style={styles.statValue}>{calculateOverallProgress()}%</Text>
               <Text style={styles.statLabel}>Today</Text>
             </View>
@@ -147,7 +147,7 @@ export default function HomeScreen({ navigation }: any) {
           {workout && workout.exercises.map((exercise) => (
             <View key={exercise.id} style={styles.exerciseRow}>
               <View style={styles.exerciseNameContainer}>
-                <Ionicons 
+                <Icon.Ionicons 
                   name={
                     exercise.name === 'Push-ups' ? 'fitness-outline' :
                     exercise.name === 'Squats' ? 'body-outline' :
@@ -187,13 +187,9 @@ export default function HomeScreen({ navigation }: any) {
             </Text>
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: '#2196F3', marginBottom: 20 }]}
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <Text style={styles.buttonText}>View Profile</Text>
-        </TouchableOpacity>
+        
+        {/* Removed the "View Profile" button */}
+        
       </ScrollView>
       
       <LevelUpModal 
@@ -394,5 +390,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     textAlign: 'center',
+    marginTop: 20,
   },
 });
